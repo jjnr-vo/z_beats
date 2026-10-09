@@ -1,0 +1,255 @@
+z_beats beta PM execution plan (8-week private beta)
+
+1. Executive summary
+
+Goal: ship a one-user, Sweden-only private web beta in ~8 weeks that lets the founder securely sign in, manually sync one R2-backed music library, browse/search by embedded metadata, stream supported tracks in-browser, and resume playback position per track.
+
+Delivery posture:
+- Optimize for speed, low fixed cost, and reversible architecture choices
+- Use managed services for auth, DB, hosting, monitoring
+- Hold the beta line hard: no playlists, no mobile apps, no public signup, no multi-user admin
+- Treat metadata quality, playback compatibility, and signed URL behavior as the main execution risks to retire early
+
+Success at beta launch means:
+- Auth works end-to-end with email verification
+- Manual sync works on a representative sample library
+- Search/browse is usable and clean
+- Supported tracks play and seek correctly in browser
+- Resume position persists reliably
+- Basic monitoring and rollback are in place
+
+2. Confirmed decisions
+
+Locked and confirmed:
+- Provider stack: Option A
+- App/runtime: Next.js
+- Hosting: Vercel
+- Auth + database: Supabase
+- Auth email delivery: custom SMTP
+- Source storage: Cloudflare R2 from day one
+- Region strategy: Supabase Stockholm (`eu-north-1`), Vercel Stockholm (`arn1`), Cloudflare R2 EU jurisdiction (`eu`)
+- Product shape: private web app first
+- Beta market: Sweden-only
+- Beta audience: one manually provisioned private user
+- Cost posture: lowest-cost bias; small monthly spend is acceptable if it clearly reduces delivery or operational risk
+- Sync model: manual “Sync now” only
+- Source model: one S3-compatible source, one stable bucket/prefix, source is canonical
+- Metadata source: embedded file metadata only for beta
+- Artwork: show embedded artwork when available
+- Browse/search: artist, album, track, plus text search
+- Playback: full in-browser streaming only; no offline mode
+- Resume: last playback position per track
+- Initial format support: MP3, AAC, M4A
+- Supported browsers/devices: latest Chrome and Safari on desktop, latest Safari on iPhone
+- Representative test library: 20-50 real-world tracks from the founder's own collection plus a few synthetic edge-case files
+- Unsupported file handling: hide unsupported files from the normal library and report them in sync results
+- Deletion behavior: deleted source tracks disappear from the user-facing library on the next sync and remain visible only in sync logs for troubleshooting
+- Manual password reset operating process: admin-triggered reset via Supabase workflow, with no separate self-service recovery flow beyond the standard verification email path
+- Environment model: single beta environment only
+- Ops posture: brief deployment downtime acceptable; lightweight uptime/error monitoring only
+- UI language: English only
+
+3. Remaining decisions requiring founder approval
+
+Decision items to resolve before or during Phase 0/1:
+
+D1. Manual password reset operating process
+- Decision: approved — admin-triggered reset via Supabase workflow; no separate self-service recovery flow beyond the standard verification email path
+
+D2. Beta launch cut naming and acceptance sign-off
+- Decision: approve the explicit “must ship” list in Section 7 as the beta contract
+- Why it matters: scope control and launch decision-making
+- Needed by: start of Week 2
+
+D3. Post-beta roadmap ordering
+- Decision: intentionally deferred until later planning
+- Why it matters: roadmap prioritization is not required to execute the current beta scope
+- Needed by: post-beta planning
+
+4. Phased backlog grouped by phase
+
+Phase 0 — Product and architecture lock
+- Approve beta cut line and success criteria
+- Define representative sample library and acceptance test set
+- Confirm manual password reset operating process
+- Define launch checklist owner and sign-off process
+
+Phase 1 — Platform bootstrap
+- Create Next.js app foundation
+- Connect repository to Vercel beta environment
+- Configure Supabase project, auth, and Postgres
+- Configure custom SMTP for verification email delivery
+- Configure Cloudflare R2 bucket/prefix access model
+- Set up secrets management across platforms
+- Set up baseline CI: install, lint, type-check, tests, build
+- Protect main branch and define deploy-to-main flow
+- Add basic error logging and uptime monitoring scaffolding
+
+Phase 2 — Auth and protected shell
+- Implement email/password sign-in flow
+- Implement email verification flow
+- Enforce protected routes/app shell
+- Enable manual account provisioning for the single beta user
+- Record basic user/app session state needed for beta
+- Validate manual password reset operating path
+- Add auth-focused integration and end-to-end coverage
+
+Phase 3 — Source integration and sync
+- Connect to the single configured R2 source bucket/prefix
+- Build manual “Sync now” orchestration path
+- Implement object listing and supported-file filtering
+- Implement diffing for new/changed/deleted files
+- Parse embedded metadata for MP3/AAC/M4A
+- Extract and store/display artwork references when available
+- Persist artist, album, track, sync run, and ingestion error records
+- Surface sync summary and failures in the app
+- Validate deletion mirroring and unsupported-format behavior
+
+Phase 4 — Library experience
+- Build library home view
+- Build browse views for artist, album, and track
+- Build text search across core metadata
+- Implement normalized sorting/search behavior
+- Display artwork where present
+- Handle empty states, sync-in-progress state, and sync-failed state
+- Validate usability on the approved browser/device set
+
+Phase 5 — Playback and resume
+- Generate short-lived protected playback URLs
+- Validate range request/seek behavior against R2
+- Build browser player experience for supported formats
+- Implement play/pause/seek behavior
+- Implement throttled playback position persistence
+- Implement resume from last saved position per track
+- Validate playback start time, seeking, and resume reliability
+- Add playback-focused tests and error logging
+
+Phase 6 — Beta hardening and launch
+- Run end-to-end tests against representative sample library
+- Fix high/critical defects only; defer nice-to-haves
+- Confirm monitoring, alerting, and rollback path
+- Execute launch checklist
+- Perform founder acceptance pass on real library
+- Freeze scope, tag beta release, and launch private beta
+- Capture post-beta backlog with explicit defer labels
+
+5. Week-by-week delivery plan
+
+Week 1 — Lock the contract and bootstrap
+- Finish Phase 0 decisions D4 and the representative sample library approval
+- Stand up Vercel, Supabase, SMTP, and R2 environments
+- Bootstrap app and CI/CD
+- Exit criteria: deployable app skeleton, environments live, beta contract approved
+
+Week 2 — Complete auth baseline
+- Deliver sign-in, verification, protected routes, manual provisioning
+- Finalize manual password reset operating process
+- Exit criteria: founder can sign in to protected shell through the real auth stack
+
+Week 3 — Prove storage + playback feasibility, start sync
+- Validate R2 signed URL + range request behavior early
+- Deliver source listing, filtering, metadata parser selection, and DB schema foundation
+- Resolve D4-D5
+- Exit criteria: technical proof that supported files can be securely fetched/seeked; sync pipeline skeleton works
+
+Week 4 — Finish manual sync
+- Deliver new/changed/deleted diff logic
+- Persist catalogue and sync run results
+- Surface sync results/errors in UI
+- Exit criteria: a full manual sync completes on the representative sample library
+
+Week 5 — Deliver browse and search
+- Build library home, artist/album/track views, search, artwork display
+- Triage metadata normalization issues from real sample data
+- Exit criteria: founder can browse and search the synced catalogue usefully
+
+Week 6 — Deliver playback and resume
+- Deliver protected playback URLs, browser player, play/pause/seek, resume persistence
+- Confirm D8 roadmap ordering to avoid scope creep
+- Exit criteria: founder can play supported tracks and resume from last position reliably
+
+Week 7 — Hardening
+- Run targeted end-to-end and manual acceptance checks
+- Fix critical/high issues only
+- Turn on monitoring and confirm rollback path
+- Exit criteria: all “must ship” items pass acceptance on approved browsers/devices
+
+Week 8 — Beta acceptance and release
+- Run final test pass on real library
+- Do founder acceptance review
+- Freeze scope, finalize release notes/known limitations, launch private beta
+- Exit criteria: beta is live and stable enough for intended one-user use
+
+6. Risks and dependencies
+
+Top risks
+- Metadata inconsistency: poor embedded tags will directly hurt browse/search quality
+- Browser/audio compatibility: some files may not play or seek consistently
+- R2/S3 compatibility edge cases: signed URL, headers, and range behavior must be validated early
+- Email delivery friction: verification emails can fail if SMTP is misconfigured
+- Scope creep: playlists, admin tooling, mobile polish, and metadata editing are likely distractions
+- Resume edge cases: over-saving or inaccurate resume points can degrade playback UX
+
+External dependencies
+- Vercel account/project readiness
+- Supabase project and EU region availability
+- SMTP provider/account and sender-domain setup
+- Cloudflare R2 bucket, credentials, and jurisdiction/region settings
+- Representative music library with rights-cleared sample files
+
+Mitigations
+- Pull forward R2 playback proof in Week 3, not Week 6
+- Use representative sample files from Week 1 onward
+- Keep support to MP3/AAC/M4A for beta
+- Use managed auth and manual support flows instead of building admin tooling
+- Enforce change control against Section 7 cut line
+
+7. Explicit beta cut line: what must ship vs what is deferred
+
+Must ship for beta
+- Real email/password auth through Supabase
+- Email verification through custom SMTP
+- One manually provisioned private user
+- Protected app shell/routes
+- One configured R2 bucket/prefix as canonical source
+- Manual “Sync now”
+- Sync diffing for new/changed/deleted supported files
+- Embedded metadata parsing for MP3/AAC/M4A
+- Artist/album/track browse views
+- Search by core metadata
+- Artwork display when embedded artwork exists
+- Secure short-lived playback URLs
+- In-browser playback with seek for supported files
+- Resume playback position per track
+- Sync status and error visibility
+- CI/build pipeline, basic uptime monitoring, error logging, rollback path
+
+Deferred until post-beta unless a must-ship item fails without them
+- Public signup
+- Self-service admin
+- Self-service password recovery beyond manual beta ops
+- Playlists
+- Tagging/curation
+- Metadata editing
+- Multiple libraries or multiple storage sources
+- Auto-sync/webhooks
+- Native mobile apps
+- Offline/download mode
+- Advanced analytics
+- Swedish localization
+- Zero-downtime deployment
+- Advanced security/compliance hardening (audit logs, formal retention policy, broader legal review)
+- Queue-backed/distributed ingestion
+
+8. Immediate next 10 tasks in priority order
+
+1. Approve the beta cut line and launch acceptance criteria in Section 7.
+2. Confirm exact EU region/jurisdiction settings for Vercel, Supabase, and R2.
+3. Create and configure the Vercel beta project, Supabase project, SMTP provider, and R2 access credentials.
+4. Bootstrap the app repository, secrets management, and baseline CI/CD pipeline.
+5. Implement and verify end-to-end auth: sign-in, email verification, protected routes, manual provisioning.
+6. Run an early R2 proof of concept for signed URLs, range requests, and supported browser playback.
+7. Build the manual sync pipeline for listing, diffing, metadata extraction, and catalogue persistence.
+8. Define and rehearse the manual beta operating procedures: password reset, sync retry, rollback, and launch sign-off.
+9. Confirm unsupported-file handling and source-deletion behavior wording before the sync UI is finalized.
+10. Prepare the representative sample library package and acceptance checklist for development use.

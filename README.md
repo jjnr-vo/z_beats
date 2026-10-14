@@ -42,9 +42,26 @@ planning. The next implementation milestone is:
 
 Planning artifacts currently in the repo:
 
-- [EM_technical-plan.md](./EM_technical-plan.md)
-- [PM_beta_execution_plan.txt](./PM_beta_execution_plan.txt)
-- [Engineering_implementation-plan.md](./Engineering_implementation-plan.md)
+- [EM_technical-plan.md](./plans/EM_technical-plan.md)
+- [PM_beta_execution_plan.txt](./plans/PM_beta_execution_plan.txt)
+- [Engineering_implementation-plan.md](./plans/Engineering_implementation-plan.md)
+
+## Auth Shell Setup
+
+The current branch adds the first protected application shell using Supabase SSR.
+
+Required environment variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Core auth routes:
+
+- `/sign-in`
+- `/auth/confirm`
+- `/dashboard`
 
 ## Next.js Reference
 

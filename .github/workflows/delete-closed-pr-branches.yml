@@ -22,7 +22,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            if (["main", "master"].includes(branch)) {
+            if (branch === "main") {
               core.info(`Skipping default branch ${branch}.`);
               return;
             }

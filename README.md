@@ -46,6 +46,11 @@ Planning artifacts currently in the repo:
 - [PM_beta_execution_plan.txt](./plans/PM_beta_execution_plan.txt)
 - [Engineering_implementation-plan.md](./plans/Engineering_implementation-plan.md)
 
+## Repository Automation
+
+GitHub Actions deletes same-repository feature branches after their pull
+requests are closed, while leaving protected branches untouched.
+
 ## Auth Shell Setup
 
 The current branch adds the first protected application shell using Supabase SSR.

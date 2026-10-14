@@ -1,0 +1,56 @@
+name: Delete closed PR branches
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  delete-branch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete closed PR branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            if (["main", "master"].includes(branch)) {
+              core.info(`Skipping default branch ${branch}.`);
+              return;
+            }
+
+            try {
+              const { data: branchInfo } = await github.rest.repos.getBranch({
+                owner,
+                repo,
+                branch,
+              });
+
+              if (branchInfo.protected) {
+                core.info(`Skipping protected branch ${branch}.`);
+                return;
+              }
+
+              await github.rest.git.deleteRef({
+                owner,
+                repo,
+                ref: `heads/${branch}`,
+              });
+
+              core.info(`Deleted closed PR branch ${branch}.`);
+            } catch (error) {
+              if (error.status === 404) {
+                core.info(`Branch ${branch} was already deleted.`);
+                return;
+              }
+
+              throw error;
+            }

@@ -11,7 +11,9 @@ import {
 
 export function PlaybackProof() {
   const [fixtureId, setFixtureId] = useState<PlaybackFixtureId>("mp3");
-  const [access, setAccess] = useState<(PlaybackAccess & { generation: number }) | null>(null);
+  const [access, setAccess] = useState<
+    (PlaybackAccess & { generation: number }) | null
+  >(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
@@ -44,9 +46,13 @@ export function PlaybackProof() {
       });
       const body: unknown = await response.json();
       if (!response.ok) {
-        const message = body && typeof body === "object" &&
-          "error" in body && typeof body.error === "string"
-          ? body.error : "Unable to obtain playback access. Try again.";
+        const message =
+          body &&
+          typeof body === "object" &&
+          "error" in body &&
+          typeof body.error === "string"
+            ? body.error
+            : "Unable to obtain playback access. Try again.";
         throw new Error(message);
       }
       if (!isPlaybackAccess(body)) {
@@ -60,7 +66,9 @@ export function PlaybackProof() {
       }
     } catch (cause) {
       if (!controller.signal.aborted) {
-        setError(cause instanceof Error ? cause.message : "Playback request failed.");
+        setError(
+          cause instanceof Error ? cause.message : "Playback request failed.",
+        );
       }
     } finally {
       if (!controller.signal.aborted) setLoading(false);
@@ -77,7 +85,9 @@ export function PlaybackProof() {
         : position;
       if (playing) await player.play();
     } catch {
-      setError("Playback was renewed, but could not resume automatically. Press Play or seek manually.");
+      setError(
+        "Playback was renewed, but could not resume automatically. Press Play or seek manually.",
+      );
     }
   }
 
@@ -86,9 +96,9 @@ export function PlaybackProof() {
       <div>
         <h2 className="text-xl font-semibold">R2 signed playback proof</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-300">
-          Load a configured sample, then test playback and seeking. Audio streams
-          directly from private R2 storage. Access links expire; renew access to
-          reload the same track near your current position.
+          Load a configured sample, then test playback and seeking. Audio
+          streams directly from private R2 storage. Access links expire; renew
+          access to reload the same track near your current position.
         </p>
       </div>
       <div className="flex flex-wrap items-end gap-3">
@@ -108,7 +118,9 @@ export function PlaybackProof() {
             }}
           >
             {playbackFixtures.map((fixture) => (
-              <option key={fixture.id} value={fixture.id}>{fixture.label}</option>
+              <option key={fixture.id} value={fixture.id}>
+                {fixture.label}
+              </option>
             ))}
           </select>
         </label>
@@ -141,7 +153,6 @@ export function PlaybackProof() {
               aria-label="R2 playback sample"
               className="w-full"
               controls
-              crossOrigin="anonymous"
               preload="metadata"
               src={access.url}
               onLoadedMetadata={() => void restorePlayback()}
@@ -150,18 +161,25 @@ export function PlaybackProof() {
                   lastPosition.current = audio.current.currentTime;
                 }
               }}
-              onError={() => setError(
-                "Audio could not be loaded. Access may have expired; renew it once. If it still fails, check the file codec, R2 content type, CORS, and network.",
-              )}
+              onError={() =>
+                setError(
+                  "Audio could not be loaded. Access may have expired; renew it once. If it still fails, check the file codec, R2 content type, CORS, and network.",
+                )
+              }
             />
             <p className="mt-2 text-sm text-zinc-400">
-              Access expires at {new Date(access.expiresAt).toLocaleTimeString()}.
-              Renewal is manual; there are no automatic retry loops.
+              Access expires at{" "}
+              {new Date(access.expiresAt).toLocaleTimeString()}. Renewal is
+              manual; there are no automatic retry loops.
             </p>
           </>
         )}
       </div>
-      {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-300">
+          {error}
+        </p>
+      )}
       <p className="text-xs leading-5 text-zinc-400">
         Proof only: no saved resume position or offline mode. Anyone holding an
         access URL can fetch the file until expiry, even after sign-out.

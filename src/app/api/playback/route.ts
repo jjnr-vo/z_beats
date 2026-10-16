@@ -13,12 +13,18 @@ function json(body: unknown, status = 200) {
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) {
-    return json({ error: "Cross-origin playback requests are not allowed." }, 403);
+    return json(
+      { error: "Cross-origin playback requests are not allowed." },
+      403,
+    );
   }
 
   try {
     const supabase = await createClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
     if (error && ![400, 401, 403].includes(error.status ?? 0)) throw error;
     if (error || !user) {
       return json({ error: "Sign in again to load playback." }, 401);
@@ -30,8 +36,12 @@ export async function POST(request: Request) {
     } catch {
       return json({ error: "A JSON fixtureId is required." }, 400);
     }
-    if (!body || typeof body !== "object" || !("fixtureId" in body) ||
-      !isPlaybackFixtureId(body.fixtureId)) {
+    if (
+      !body ||
+      typeof body !== "object" ||
+      !("fixtureId" in body) ||
+      !isPlaybackFixtureId(body.fixtureId)
+    ) {
       return json({ error: "Choose a known playback fixture." }, 400);
     }
 
@@ -42,8 +52,14 @@ export async function POST(request: Request) {
     }
     // Do not log SDK errors: they may contain signed URLs or request credentials.
     console.error("Playback URL issuance failed.", {
-      category: error instanceof Error ? error.name : "UnknownError",
+      category: error instanceof Error ? error.message : "UnknownError",
     });
-    return json({ error: "Unable to load playback. Check the server R2 configuration and try again." }, 503);
+    return json(
+      {
+        error:
+          "Unable to load playback. Check the server R2 configuration and try again.",
+      },
+      503,
+    );
   }
 }

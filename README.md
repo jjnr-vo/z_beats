@@ -21,6 +21,25 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Debugging in VS Code
+
+Configure your local `.env` using [.env.example](./.env.example), then open
+**Run and Debug** and select a configuration from
+[.vscode/launch.json](./.vscode/launch.json):
+
+- **Next.js: server-side** starts the dev server with server-side debugging.
+- **Next.js: full stack (Chrome)** also opens a Chrome debugging session once the
+  server reports its local URL, enabling client-side breakpoints.
+
+Press **F5** to start. Next.js loads the environment files itself; no credentials
+belong in the debug configuration. Stop any existing dev server for this workspace
+before launching a debug session. Server code runs when you visit the relevant
+page or call its endpoint, so trigger that request to hit a breakpoint.
+
+Dependency installation and dev-server commands are also available in the Agents
+Run button through [.vscode/tasks.json](./.vscode/tasks.json). Use the debug
+configurations above, rather than the plain dev-server task, for breakpoints.
+
 ## Available Scripts
 
 ```bash

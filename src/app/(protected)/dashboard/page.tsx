@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { PlaybackProof } from "./playback-proof";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -27,8 +28,8 @@ export default async function DashboardPage() {
         <section className="rounded-2xl border border-white/10 bg-black/20 p-5">
           <h3 className="text-lg font-semibold text-zinc-50">Next milestone</h3>
           <p className="mt-2 text-sm leading-6 text-zinc-300">
-            Validate email confirmation end-to-end, then connect R2 signed playback and the
-            first sync proof.
+            Validate email confirmation and the R2 playback proof in the deployed
+            environment, then begin source listing and metadata validation.
           </p>
         </section>
         <section className="rounded-2xl border border-white/10 bg-black/20 p-5">
@@ -39,6 +40,7 @@ export default async function DashboardPage() {
           </p>
         </section>
       </div>
+      <PlaybackProof />
     </div>
   );
 }

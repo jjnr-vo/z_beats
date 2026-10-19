@@ -1,210 +1,34 @@
-"use client";
+import type { Dispatch, RefObject, SetStateAction } from "react";
+import type { PlayerTrack, Track } from "./music-library.types";
+import { artworkClasses } from "./music-library.constants";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  isPlaybackAccess,
-  type PlaybackAccess,
-  type PlaybackFixtureId,
-} from "@/lib/playback";
-
-type Track = {
-  id: number;
-  title: string;
-  artist: string;
-  album: string;
-  duration: string;
-  fixtureId: PlaybackFixtureId;
-  artwork: "blue" | "ochre" | "moss" | "lilac" | "coral";
-};
-
-const sampleTracks: Track[] = [
-  {
-    id: 1,
-    title: "A Small Weather",
-    artist: "Mara Vale",
-    album: "Rooms for the Tide",
-    duration: "3:42",
-    fixtureId: "mp3",
-    artwork: "blue",
-  },
-  {
-    id: 2,
-    title: "Low Lantern",
-    artist: "North Window",
-    album: "Rooms for the Tide",
-    duration: "4:18",
-    fixtureId: "aac",
-    artwork: "ochre",
-  },
-  {
-    id: 3,
-    title: "Glass Orchard",
-    artist: "Mara Vale",
-    album: "Field Notes",
-    duration: "2:56",
-    fixtureId: "m4a",
-    artwork: "moss",
-  },
-  {
-    id: 4,
-    title: "Still, the River",
-    artist: "Oren & June",
-    album: "Soft Geometry",
-    duration: "5:07",
-    fixtureId: "long",
-    artwork: "lilac",
-  },
-  {
-    id: 5,
-    title: "Almost Home",
-    artist: "North Window",
-    album: "Field Notes",
-    duration: "3:31",
-    fixtureId: "special",
-    artwork: "coral",
-  },
-  {
-    id: 6,
-    title: "Blue Hour, Again",
-    artist: "Oren & June",
-    album: "Soft Geometry",
-    duration: "4:02",
-    fixtureId: "mp3",
-    artwork: "blue",
-  },
-  {
-    id: 7,
-    title: "Paper Moons",
-    artist: "Mara Vale",
-    album: "Field Notes",
-    duration: "3:16",
-    fixtureId: "aac",
-    artwork: "moss",
-  },
-  {
-    id: 8,
-    title: "Between the Pines",
-    artist: "North Window",
-    album: "Rooms for the Tide",
-    duration: "4:44",
-    fixtureId: "m4a",
-    artwork: "ochre",
-  },
-];
-
-const artworkClasses: Record<Track["artwork"], string> = {
-  blue: "bg-[#627d8b]",
-  ochre: "bg-[#b88b5b]",
-  moss: "bg-[#8c9a7b]",
-  lilac: "bg-[#9b91a3]",
-  coral: "bg-[#bd7865]",
-};
-
-type PlayerTrack = {
-  track: Track;
-  access: PlaybackAccess;
-  generation: number;
-};
-
-export function Library() {
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState("added");
-  const [playerTrack, setPlayerTrack] = useState<PlayerTrack | null>(null);
-  const [loadingTrackId, setLoadingTrackId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const audio = useRef<HTMLAudioElement>(null);
-  const pendingRequest = useRef<AbortController | null>(null);
-  const shouldStartPlayback = useRef(false);
-
-  useEffect(() => () => pendingRequest.current?.abort(), []);
-
-  const visibleTracks = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase();
-    const matches = sampleTracks.filter((track) =>
-      [track.title, track.artist, track.album]
-        .join(" ")
-        .toLocaleLowerCase()
-        .includes(normalizedQuery),
-    );
-
-    switch (sort) {
-      case "title":
-        return matches.sort((a, b) => a.title.localeCompare(b.title));
-      case "artist":
-        return matches.sort(
-          (a, b) =>
-            a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title),
-        );
-      case "album":
-        return matches.sort(
-          (a, b) =>
-            a.album.localeCompare(b.album) || a.title.localeCompare(b.title),
-        );
-      default:
-        return matches;
-    }
-  }, [query, sort]);
-
-  async function playTrack(track: Track) {
-    pendingRequest.current?.abort();
-    const controller = new AbortController();
-    pendingRequest.current = controller;
-    setLoadingTrackId(track.id);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/playback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fixtureId: track.fixtureId }),
-        cache: "no-store",
-        signal: controller.signal,
-      });
-      const body: unknown = await response.json();
-      if (!response.ok) {
-        const message =
-          body &&
-          typeof body === "object" &&
-          "error" in body &&
-          typeof body.error === "string"
-            ? body.error
-            : "Unable to load this sample. Try again.";
-        throw new Error(message);
-      }
-      if (!isPlaybackAccess(body)) {
-        throw new Error("The server returned invalid playback access.");
-      }
-      if (!controller.signal.aborted) {
-        shouldStartPlayback.current = true;
-        setPlayerTrack((current) => ({
-          track,
-          access: body,
-          generation: (current?.generation ?? 0) + 1,
-        }));
-      }
-    } catch (cause) {
-      if (!controller.signal.aborted) {
-        setError(
-          cause instanceof Error ? cause.message : "Playback request failed.",
-        );
-      }
-    } finally {
-      if (!controller.signal.aborted) setLoadingTrackId(null);
-    }
-  }
-
-  async function startPlayback() {
-    if (!shouldStartPlayback.current || !audio.current) return;
-    shouldStartPlayback.current = false;
-    try {
-      await audio.current.play();
-    } catch {
-      setError(
-        "Playback could not start automatically. Press Play in the player.",
-      );
-    }
-  }
-
+export function MusicLibraryView({
+  audio,
+  error,
+  loadingTrackId,
+  playTrack,
+  playerTrack,
+  query,
+  setError,
+  setQuery,
+  setSort,
+  sort,
+  startPlayback,
+  visibleTracks,
+}: {
+  audio: RefObject<HTMLAudioElement | null>;
+  error: string | null;
+  loadingTrackId: number | null;
+  playTrack(track: Track): Promise<void>;
+  playerTrack: PlayerTrack | null;
+  query: string;
+  setError: Dispatch<SetStateAction<string | null>>;
+  setQuery: Dispatch<SetStateAction<string>>;
+  setSort: Dispatch<SetStateAction<string>>;
+  sort: string;
+  startPlayback: () => Promise<void>;
+  visibleTracks: Track[];
+}) {
   return (
     <>
       <section aria-labelledby="library-title">
@@ -413,6 +237,7 @@ export function Library() {
                   aria-hidden="true"
                   className={`relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-md ${artworkClasses[playerTrack.track.artwork]}`}
                 >
+                  {/* TODO: separate the logic for artwork so it can be used when missing data */}
                   <span className="absolute -right-2 -top-3 size-8 rounded-full border border-white/45" />
                   <span className="relative size-3 rounded-full bg-white/65" />
                 </div>

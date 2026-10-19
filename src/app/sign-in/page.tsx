@@ -20,20 +20,20 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         : undefined;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-6 py-16 text-zinc-50">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur">
+    <main className="flex min-h-screen items-center justify-center bg-[#f3f4f0] px-5 py-12 text-[#172a38] sm:px-6">
+      <div className="w-full max-w-md rounded-2xl border border-[#d8dfdc] bg-[#fafbf8] p-7 shadow-[0_20px_60px_rgba(23,42,56,0.08)] sm:p-9">
         <div className="space-y-3">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-zinc-400">
-            z_beats auth shell
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight">Sign in to your beta workspace</h1>
-          <p className="text-sm leading-6 text-zinc-300">
-            Use the manually provisioned beta account to access the protected dashboard.
+          <p className="text-sm font-medium text-[#687981]">Your music, kept close.</p>
+          <h1 className="text-3xl font-semibold tracking-[-0.055em]">
+            Sign in to your library
+          </h1>
+          <p className="text-sm leading-6 text-[#52656d]">
+            Use your private z_beats account to return to your collection.
           </p>
         </div>
 
         {params.error ? (
-          <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+          <div className="mt-6 rounded-lg border border-[#d9b0a2] bg-[#fff8f5] px-4 py-3 text-sm text-[#7e3825]">
             {params.error}
           </div>
         ) : null}
@@ -43,9 +43,9 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         </div>
 
         <div className="mt-6 text-sm text-zinc-400">
-          Need to go back?{" "}
-          <Link className="font-medium text-emerald-300 hover:text-emerald-200" href="/">
-            Return to the project home
+          Need help?{" "}
+          <Link className="font-medium text-[#a74f31] hover:text-[#7e3825]" href="/">
+            Return to z_beats
           </Link>
         </div>
       </div>

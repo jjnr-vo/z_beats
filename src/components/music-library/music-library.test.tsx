@@ -8,7 +8,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Library } from "./library";
+import { MusicLibrary } from "./music-library";
 
 const fetchMock = vi.fn();
 
@@ -31,7 +31,7 @@ afterEach(() => {
 
 describe("private library", () => {
   it("identifies demo content and searches by title, artist, or album", () => {
-    render(<Library />);
+    render(<MusicLibrary />);
 
     expect(
       screen.getByText(/demo content for layout and playback testing/i),
@@ -59,7 +59,7 @@ describe("private library", () => {
   });
 
   it("keeps the player available while searching the collection", async () => {
-    render(<Library />);
+    render(<MusicLibrary />);
 
     const trackTitle = "A Small Weather";
     const trackArtist = "Mara Vale";

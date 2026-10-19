@@ -67,6 +67,43 @@ Planning artifacts currently in the repo:
 
 ## Repository Automation
 
+### PR validation and merge protection
+
+[PR validation](./.github/workflows/pr-validation.yml) runs on pull requests
+targeting `main`, pushes to `main`, and merge-queue checks. It can also be
+triggered manually from GitHub Actions.
+
+The single **PR validation** job uses Node.js 24 and the committed npm lockfile
+to run `npm ci`, `npm test`, `npm run lint`, `npm run build`, and
+`npm run typecheck`. Tests are not allowed to
+fail or be skipped. The build runs before the standalone type-check so Next.js
+has generated its route types on a clean checkout. No Supabase or R2 credentials
+are required: tests mock external services and CI does not run live playback
+acceptance checks.
+
+**The workflow alone does not block merges.** An administrator must configure
+GitHub under **Settings > Rules > Rulesets** with an active branch ruleset for
+`main` (or use **Settings > Branches > Branch protection rules**):
+
+1. Require a pull request before merging.
+2. Require status checks to pass and select **PR validation**, provided by
+   GitHub Actions, after the workflow has run at least once.
+3. Require branches to be up to date before merging (or use a merge queue).
+4. Remove bypass permissions if all merges, including administrator merges,
+   must pass validation.
+
+If GitHub does not allow enforcement for this repository's visibility and plan,
+the workflow still reports results but cannot itself enforce a merge block.
+Keep the job name stable because the required-check setting refers to that name.
+There are deliberately no path filters or draft-PR exclusions, which could leave
+a required check missing. Superseded runs are cancelled when a branch is updated.
+Repository settings are not changed by committing this workflow.
+
+For dependency changes, run `npm install` and commit both
+[package.json](./package.json) and [package-lock.json](./package-lock.json).
+CI uses `npm ci` to reject a manifest/lockfile mismatch rather than silently
+resolving new dependency versions.
+
 GitHub Actions deletes same-repository feature branches after their pull
 requests are closed, while leaving protected branches untouched.
 
@@ -124,7 +161,12 @@ custom player, or persistent resume state in this proof.
     "AllowedOrigins": ["http://localhost:3000", "https://your-app.vercel.app"],
     "AllowedMethods": ["GET", "HEAD"],
     "AllowedHeaders": ["Range"],
-    "ExposeHeaders": ["Accept-Ranges", "Content-Range", "Content-Length", "ETag"],
+    "ExposeHeaders": [
+      "Accept-Ranges",
+      "Content-Range",
+      "Content-Length",
+      "ETag"
+    ],
     "MaxAgeSeconds": 300
   }
 ]
@@ -155,22 +197,22 @@ They do **not** prove real R2 or browser codec/range compatibility.
 
 Run the following against the deployed application and real R2 fixtures:
 
-| Check | Expected result |
-| --- | --- |
-| Anonymous POST to `/api/playback` | JSON 401, no URL, no redirect |
-| Signed-in request with unknown fixture ID | JSON 400, no URL |
-| Request from a different Origin | JSON 403 |
-| Missing configured object | JSON 404 and visible player error |
-| Missing key/config or R2 permission failure | JSON 503 and visible player error |
-| Object GET without signature | Denied; bucket remains private |
-| Signed GET with `Range: bytes=0-1023` | 206, correct `Content-Range`, exactly 1,024 bytes for a fixture larger than 1 KiB |
-| Allowed Origin sent on range request | Matching `Access-Control-Allow-Origin`; range headers exposed |
-| All fixtures in Chrome desktop, Safari desktop, Safari iPhone | Metadata loads; play/pause and forward/backward seeks work |
-| Fresh range request after a 10-second URL expires | Denied; do not mistake cached/buffered playback for valid access |
-| Renew access after expiry or a long pause | New URL issued; current position restored; Play works |
-| Renew while playing | Position restored and playback continues, or explicit browser-blocked resume message |
-| Sign out, then request new playback access | 401; existing URL remains usable only until expiry |
-| Healthy-network playback start from Sweden | Record time from pressing Play to audible playback; proposed target <=3 seconds |
+| Check                                                         | Expected result                                                                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Anonymous POST to `/api/playback`                             | JSON 401, no URL, no redirect                                                        |
+| Signed-in request with unknown fixture ID                     | JSON 400, no URL                                                                     |
+| Request from a different Origin                               | JSON 403                                                                             |
+| Missing configured object                                     | JSON 404 and visible player error                                                    |
+| Missing key/config or R2 permission failure                   | JSON 503 and visible player error                                                    |
+| Object GET without signature                                  | Denied; bucket remains private                                                       |
+| Signed GET with `Range: bytes=0-1023`                         | 206, correct `Content-Range`, exactly 1,024 bytes for a fixture larger than 1 KiB    |
+| Allowed Origin sent on range request                          | Matching `Access-Control-Allow-Origin`; range headers exposed                        |
+| All fixtures in Chrome desktop, Safari desktop, Safari iPhone | Metadata loads; play/pause and forward/backward seeks work                           |
+| Fresh range request after a 10-second URL expires             | Denied; do not mistake cached/buffered playback for valid access                     |
+| Renew access after expiry or a long pause                     | New URL issued; current position restored; Play works                                |
+| Renew while playing                                           | Position restored and playback continues, or explicit browser-blocked resume message |
+| Sign out, then request new playback access                    | 401; existing URL remains usable only until expiry                                   |
+| Healthy-network playback start from Sweden                    | Record time from pressing Play to audible playback; proposed target <=3 seconds      |
 
 Use browser network tools or a local HTTP client for the byte-range check. Send
 an `Origin` header when checking CORS, and use GET rather than `curl -I` with a

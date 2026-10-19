@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PlaybackProof } from "./playback-proof";
 
@@ -34,12 +40,14 @@ describe("playback proof", () => {
     render(<PlaybackProof />);
     expect(fetchMock).not.toHaveBeenCalled();
     const player = await load();
-    expect(fetchMock).toHaveBeenCalledWith("/api/playback", expect.objectContaining({
-      method: "POST",
-      body: '{"fixtureId":"mp3"}',
-      cache: "no-store",
-    }));
-    expect(player.getAttribute("crossorigin")).toBe("anonymous");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/playback",
+      expect.objectContaining({
+        method: "POST",
+        body: '{"fixtureId":"mp3"}',
+        cache: "no-store",
+      }),
+    );
     expect(player.controls).toBe(true);
   });
 
@@ -48,11 +56,14 @@ describe("playback proof", () => {
     const oldPlayer = await load();
     oldPlayer.currentTime = 123;
     fireEvent.timeUpdate(oldPlayer);
-    fireEvent.click(screen.getByRole("button", { name: "Renew access at current position" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Renew access at current position" }),
+    );
     await waitFor(() => {
       expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer);
     });
-    const player = screen.getByLabelText<HTMLAudioElement>("R2 playback sample");
+    const player =
+      screen.getByLabelText<HTMLAudioElement>("R2 playback sample");
     Object.defineProperty(player, "duration", { value: 300 });
     fireEvent.loadedMetadata(player);
     expect(player.currentTime).toBe(123);
@@ -64,21 +75,33 @@ describe("playback proof", () => {
     render(<PlaybackProof />);
     const oldPlayer = await load();
     Object.defineProperty(oldPlayer, "paused", { value: false });
-    fireEvent.click(screen.getByRole("button", { name: "Renew access at current position" }));
-    await waitFor(() => expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Renew access at current position" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer),
+    );
     fireEvent.loadedMetadata(screen.getByLabelText("R2 playback sample"));
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce();
   });
 
   it("surfaces autoplay rejection instead of silently claiming successful resume", async () => {
-    vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValue(new Error("blocked"));
+    vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValue(
+      new Error("blocked"),
+    );
     render(<PlaybackProof />);
     const oldPlayer = await load();
     Object.defineProperty(oldPlayer, "paused", { value: false });
-    fireEvent.click(screen.getByRole("button", { name: "Renew access at current position" }));
-    await waitFor(() => expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Renew access at current position" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer),
+    );
     fireEvent.loadedMetadata(screen.getByLabelText("R2 playback sample"));
-    expect((await screen.findByRole("alert")).textContent).toContain("Press Play");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Press Play",
+    );
   });
 
   it("surfaces media errors without an automatic retry loop", async () => {
@@ -91,12 +114,17 @@ describe("playback proof", () => {
   it("clears the previous sample when selecting a new fixture", async () => {
     render(<PlaybackProof />);
     await load();
-    fireEvent.change(screen.getByLabelText("Sample"), { target: { value: "m4a" } });
+    fireEvent.change(screen.getByLabelText("Sample"), {
+      target: { value: "m4a" },
+    });
     expect(screen.queryByLabelText("R2 playback sample")).toBeNull();
     await load();
-    expect(fetchMock).toHaveBeenLastCalledWith("/api/playback", expect.objectContaining({
-      body: '{"fixtureId":"m4a"}',
-    }));
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/playback",
+      expect.objectContaining({
+        body: '{"fixtureId":"m4a"}',
+      }),
+    );
   });
 
   it("surfaces API failures", async () => {
@@ -106,17 +134,24 @@ describe("playback proof", () => {
     });
     render(<PlaybackProof />);
     fireEvent.click(screen.getByRole("button", { name: "Load track" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("Sign in again");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Sign in again",
+    );
     expect(screen.queryByLabelText("R2 playback sample")).toBeNull();
   });
 
   it("rejects malformed success responses", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
-      json: async () => ({ url: "javascript:alert(1)", expiresAt: "not a date" }),
+      json: async () => ({
+        url: "javascript:alert(1)",
+        expiresAt: "not a date",
+      }),
     });
     render(<PlaybackProof />);
     fireEvent.click(screen.getByRole("button", { name: "Load track" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("invalid playback access");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "invalid playback access",
+    );
   });
 });

@@ -51,9 +51,10 @@ export async function POST(request: Request) {
       return json({ error: "This playback fixture is missing from R2." }, 404);
     }
     // Do not log SDK errors: they may contain signed URLs or request credentials.
-    console.error("Playback URL issuance failed.", {
-      category: error instanceof Error ? error.message : "UnknownError",
-    });
+    console.error("Playback URL issuance failed.");
+    // console.error("Playback URL issuance failed.", {
+    //   category: error instanceof Error ? error.message : "UnknownError",
+    // });
     return json(
       {
         error:

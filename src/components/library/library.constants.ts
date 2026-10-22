@@ -1,4 +1,4 @@
-import type { Artwork, Track } from "./music-library.types";
+import type { Artwork, Track } from "./library.types";
 
 export const artworkClasses: Record<Artwork, string> = {
   blue: "bg-[#627d8b]",
@@ -20,15 +20,6 @@ export const sampleTracks: Track[] = [
   },
   {
     id: 2,
-    title: "Low Lantern",
-    artist: "North Window",
-    album: "Rooms for the Tide",
-    duration: "4:18",
-    fixtureId: "aac",
-    artwork: "ochre",
-  },
-  {
-    id: 3,
     title: "Glass Orchard",
     artist: "Mara Vale",
     album: "Field Notes",
@@ -37,7 +28,7 @@ export const sampleTracks: Track[] = [
     artwork: "moss",
   },
   {
-    id: 4,
+    id: 3,
     title: "Still, the River",
     artist: "Oren & June",
     album: "Soft Geometry",
@@ -46,7 +37,7 @@ export const sampleTracks: Track[] = [
     artwork: "lilac",
   },
   {
-    id: 5,
+    id: 4,
     title: "Almost Home",
     artist: "North Window",
     album: "Field Notes",
@@ -55,7 +46,7 @@ export const sampleTracks: Track[] = [
     artwork: "coral",
   },
   {
-    id: 6,
+    id: 5,
     title: "Blue Hour, Again",
     artist: "Oren & June",
     album: "Soft Geometry",
@@ -64,21 +55,21 @@ export const sampleTracks: Track[] = [
     artwork: "blue",
   },
   {
-    id: 7,
-    title: "Paper Moons",
-    artist: "Mara Vale",
-    album: "Field Notes",
-    duration: "3:16",
-    fixtureId: "aac",
-    artwork: "moss",
+    id: 6,
+    title: "Cosmic Champagne",
+    artist: "Daniel Fridell",
+    album: "",
+    duration: "3:38",
+    fixtureId: "wav",
+    artwork: "ochre",
   },
   {
-    id: 8,
-    title: "Between the Pines",
-    artist: "North Window",
-    album: "Rooms for the Tide",
-    duration: "4:44",
-    fixtureId: "m4a",
+    id: 7,
+    title: "Make up Your Mind (Instrumental Version)",
+    artist: "Relyae",
+    album: "",
+    duration: "02:58",
+    fixtureId: "mp3",
     artwork: "ochre",
   },
 ];

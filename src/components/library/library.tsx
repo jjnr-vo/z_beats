@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { isPlaybackAccess } from "@/lib/playback";
-import { sampleTracks } from "./music-library.constants";
-import type { PlayerTrack, Track } from "./music-library.types";
-import { MusicLibraryView } from "./music-library.view";
+import { sampleTracks } from "./library.constants";
+import type { PlayerTrack, Track } from "./library.types";
+import { LibraryView } from "./library.view";
+import { Player } from "../player/player";
 
-export function MusicLibrary() {
+export function Library() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("added");
   const [playerTrack, setPlayerTrack] = useState<PlayerTrack | null>(null);
@@ -54,32 +55,15 @@ export function MusicLibrary() {
     setError(null);
 
     try {
-      const response = await fetch("/api/playback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fixtureId: track.fixtureId }),
-        cache: "no-store",
-        signal: controller.signal,
-      });
-      const body: unknown = await response.json();
-      if (!response.ok) {
-        const message =
-          body &&
-          typeof body === "object" &&
-          "error" in body &&
-          typeof body.error === "string"
-            ? body.error
-            : "Unable to load this sample. Try again.";
-        throw new Error(message);
-      }
-      if (!isPlaybackAccess(body)) {
+      const trackResponse = await getTrack(track, controller);
+      if (!isPlaybackAccess(trackResponse)) {
         throw new Error("The server returned invalid playback access.");
       }
       if (!controller.signal.aborted) {
         shouldStartPlayback.current = true;
         setPlayerTrack((current) => ({
           track,
-          access: body,
+          access: trackResponse,
           generation: (current?.generation ?? 0) + 1,
         }));
       }
@@ -107,19 +91,46 @@ export function MusicLibrary() {
   }
 
   return (
-    <MusicLibraryView
-      audio={audio}
-      error={error}
-      loadingTrackId={loadingTrackId}
-      playTrack={playTrack}
-      playerTrack={playerTrack}
-      query={query}
-      setError={setError}
-      setQuery={setQuery}
-      setSort={setSort}
-      sort={sort}
-      startPlayback={startPlayback}
-      visibleTracks={visibleTracks}
-    />
+    <>
+      <LibraryView
+        loadingTrackId={loadingTrackId}
+        playTrack={playTrack}
+        query={query}
+        setQuery={setQuery}
+        setSort={setSort}
+        sort={sort}
+        visibleTracks={visibleTracks}
+      />
+      <Player
+        audio={audio}
+        error={error}
+        playerTrack={playerTrack}
+        setError={setError}
+        startPlayback={startPlayback}
+      />
+    </>
   );
+}
+
+async function getTrack(track: Track, controller: AbortController) {
+  const response = await fetch("/api/playback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fixtureId: track.fixtureId }),
+    cache: "no-store",
+    signal: controller.signal,
+  });
+  const body: unknown = await response.json();
+  if (!response.ok) {
+    const message =
+      body &&
+      typeof body === "object" &&
+      "error" in body &&
+      typeof body.error === "string"
+        ? body.error
+        : "Unable to load this sample. Try again.";
+    throw new Error(message);
+  }
+
+  return body;
 }

@@ -10,6 +10,7 @@ import type { PlaybackAccess, PlaybackFixtureId } from "./playback";
 
 const fixtureVariables: Record<PlaybackFixtureId, string> = {
   mp3: "R2_FIXTURE_MP3_KEY",
+  wav: "R2_FIXTURE_WAV_KEY",
   aac: "R2_FIXTURE_AAC_KEY",
   m4a: "R2_FIXTURE_M4A_KEY",
   long: "R2_FIXTURE_LONG_KEY",

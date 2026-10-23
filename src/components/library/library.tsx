@@ -6,6 +6,7 @@ import type { LibraryTrack, PlayerTrack } from "./library.types";
 import { LibraryView } from "./library.view";
 import { Player } from "../player/player";
 import type { SourceListing } from "@/lib/r2/r2";
+import { getRandomArtwork } from "@/utils/artwork";
 import { isPlaybackAccess } from "@/utils/playback";
 
 export function Library({ listing }: { listing: SourceListing }) {
@@ -28,7 +29,7 @@ export function Library({ listing }: { listing: SourceListing }) {
         artist: "Unknown artist",
         album: "Unknown album",
         duration: "--:--",
-        artwork: "blue",
+        artwork: getRandomArtwork(),
         lastModified: object.lastModified,
       })),
     [listing],

@@ -1,5 +1,6 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
 
 function buildRedirectURL(request: NextRequest, path: string) {

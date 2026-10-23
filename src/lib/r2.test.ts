@@ -1,4 +1,7 @@
+import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createPlaybackAccess, PlaybackObjectNotFoundError } from "./r2";
 
 vi.mock("server-only", () => ({}));
 
@@ -6,9 +9,6 @@ const mocks = vi.hoisted(() => ({
   send: vi.fn(),
   destroy: vi.fn(),
 }));
-
-import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { createPlaybackAccess, PlaybackObjectNotFoundError } from "./r2";
 
 beforeEach(() => {
   vi.stubEnv("R2_ACCOUNT_ID", "a".repeat(32));

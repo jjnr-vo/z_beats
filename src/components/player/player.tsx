@@ -1,6 +1,7 @@
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import type { PlayerTrack } from "../library/library.types";
+
 import { artworkClasses } from "../library/library.constants";
+import type { PlayerTrack } from "../library/library.types";
 
 export function Player({
   audio,

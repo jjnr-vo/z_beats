@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { POST } from "./route";
+import { PlaybackObjectNotFoundError } from "@/lib/r2";
+
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   sign: vi.fn(),
@@ -12,9 +15,6 @@ vi.mock("@/lib/r2", () => ({
   createPlaybackAccess: mocks.sign,
   PlaybackObjectNotFoundError: class extends Error {},
 }));
-
-import { POST } from "./route";
-import { PlaybackObjectNotFoundError } from "@/lib/r2";
 
 function request(body = '{"fixtureId":"mp3"}', origin = "https://beats.example") {
   return new Request("https://beats.example/api/playback", {

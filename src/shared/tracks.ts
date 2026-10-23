@@ -1,5 +1,5 @@
 import type { Artwork } from "./artwork";
-import type { PlaybackFixtureId } from "@/lib/playback";
+import type { PlaybackFixtureId } from "@/utils/playback";
 
 export type Track = {
   id: number;

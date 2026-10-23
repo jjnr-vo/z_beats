@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { isPlaybackFixtureId } from "@/lib/playback";
-import { createPlaybackAccess, PlaybackObjectNotFoundError } from "@/lib/r2";
+import { createPlaybackAccess, PlaybackObjectNotFoundError } from "@/lib/r2/r2";
 import { createClient } from "@/lib/supabase/server";
+import { isPlaybackFixtureId } from "@/utils/playback";
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, {

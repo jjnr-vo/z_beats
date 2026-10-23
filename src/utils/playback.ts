@@ -1,21 +1,13 @@
-export const playbackFixtures = [
-  { id: "mp3", label: "MP3 sample" },
-  { id: "wav", label: "WAV sample" },
-  { id: "aac", label: "AAC sample" },
-  { id: "m4a", label: "M4A sample" },
-  { id: "long", label: "Long track" },
-  { id: "special", label: "Special-character path" },
-] as const;
+import { trackFormatFixtures } from "@/utils/track-format";
 
-export type PlaybackFixtureId = (typeof playbackFixtures)[number]["id"];
-
+export type PlaybackFixtureId = (typeof trackFormatFixtures)[number];
 export type PlaybackAccess = {
   url: string;
   expiresAt: string;
 };
 
 export function isPlaybackFixtureId(value: unknown): value is PlaybackFixtureId {
-  return playbackFixtures.some((fixture) => fixture.id === value);
+  return trackFormatFixtures.some((fixture) => fixture === value);
 }
 
 export function isPlaybackAccess(value: unknown): value is PlaybackAccess {

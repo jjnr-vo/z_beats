@@ -1,46 +1,21 @@
-import { requireUser } from "@/lib/auth";
-import { PlaybackProof } from "./playback-proof";
+import { Library } from "@/components/library/library";
 
-export default async function DashboardPage() {
-  const user = await requireUser();
-
+export default function DashboardPage() {
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-lg shadow-black/20">
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-zinc-400">
-          Signed in
+    <>
+      <div className="flex flex-col gap-7 border-b border-[#d8dfdc] pb-8 sm:flex-row sm:items-end sm:justify-between">
+        <h1
+          className="mt-2 text-4xl font-semibold tracking-[-0.065em] text-[#172a38] sm:text-5xl"
+          id="library-title"
+        >
+          Library
+        </h1>
+        <p className="mt-3 max-w-xl text-sm leading-6 text-[#52656d]">
+          A home for the music you keep. Find a track, press play, and stay
+          right here.
         </p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50">
-          Welcome back to the z_beats beta workspace
-        </h2>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-300 sm:text-base">
-          This protected route proves the first auth milestone: Supabase SSR sessions are
-          active, protected pages can enforce access, and the branch is ready for sync and
-          playback infrastructure work.
-        </p>
-      </section>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5">
-          <h3 className="text-lg font-semibold text-zinc-50">Authenticated user</h3>
-          <p className="mt-2 break-all text-sm leading-6 text-zinc-300">{user.email}</p>
-        </section>
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5">
-          <h3 className="text-lg font-semibold text-zinc-50">Next milestone</h3>
-          <p className="mt-2 text-sm leading-6 text-zinc-300">
-            Validate email confirmation and the R2 playback proof in the deployed
-            environment, then begin source listing and metadata validation.
-          </p>
-        </section>
-        <section className="rounded-2xl border border-white/10 bg-black/20 p-5">
-          <h3 className="text-lg font-semibold text-zinc-50">Session behavior</h3>
-          <p className="mt-2 text-sm leading-6 text-zinc-300">
-            Sessions are refreshed through the request proxy and protected routes redirect
-            anonymous users back to sign in.
-          </p>
-        </section>
       </div>
-      <PlaybackProof />
-    </div>
+      <Library />
+    </>
   );
 }

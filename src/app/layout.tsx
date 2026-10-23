@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "z_beats",
-  description: "Private beta music catalogue and playback app.",
+  title: "z_beats — your private music library",
+  description: "A private, collection-first home for your music.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

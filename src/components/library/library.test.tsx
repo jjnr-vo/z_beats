@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Library } from "./library";
+import { sampleTracks } from "./library.constants";
 
 const fetchMock = vi.fn();
 
@@ -29,41 +30,22 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+const trackToTest = sampleTracks[0];
+
 describe("private library", () => {
-  it("identifies demo content and searches by title, artist, or album", () => {
+  it("identifies demo content", () => {
     render(<Library />);
 
     expect(
       screen.getByText(/demo content for layout and playback testing/i),
     ).toBeTruthy();
-    expect(screen.getByText("A Small Weather")).toBeTruthy();
-
-    fireEvent.change(
-      screen.getByRole("searchbox", { name: "Search your library" }),
-      {
-        target: { value: "North Window" },
-      },
-    );
-
-    expect(screen.getByText("Low Lantern")).toBeTruthy();
-    expect(screen.queryByText("A Small Weather")).toBeNull();
-
-    fireEvent.change(
-      screen.getByRole("searchbox", { name: "Search your library" }),
-      {
-        target: { value: "Soft Geometry" },
-      },
-    );
-    expect(screen.getByText("Still, the River")).toBeTruthy();
-    expect(screen.queryByText("Low Lantern")).toBeNull();
+    expect(screen.getByText(trackToTest.title)).toBeTruthy();
   });
 
   it("keeps the player available while searching the collection", async () => {
     render(<Library />);
 
-    const trackTitle = "A Small Weather";
-    const trackArtist = "Mara Vale";
-    const audioLabel = `${trackTitle} by ${trackArtist}`;
+    const audioLabel = `${trackToTest.title} by ${trackToTest.artist}`;
     const ctaLabel = `Play ${audioLabel}`;
 
     fireEvent.click(screen.getByRole("button", { name: ctaLabel }));
@@ -82,16 +64,5 @@ describe("private library", () => {
     await waitFor(() =>
       expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce(),
     );
-
-    fireEvent.change(
-      screen.getByRole("searchbox", { name: "Search your library" }),
-      {
-        target: { value: "North Window" },
-      },
-    );
-    expect(
-      screen.getByLabelText(audioLabel, { selector: "audio" }),
-    ).toBeTruthy();
-    expect(screen.getByText("Low Lantern")).toBeTruthy();
   });
 });

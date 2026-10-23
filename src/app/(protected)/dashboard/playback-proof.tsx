@@ -9,6 +9,11 @@ import {
   type PlaybackFixtureId,
 } from "@/lib/playback";
 
+/**
+ * @deprecated
+ *
+ * Component to be removed when library collects more smaples with different music formats
+ */
 export function PlaybackProof() {
   const [fixtureId, setFixtureId] = useState<PlaybackFixtureId>("mp3");
   const [access, setAccess] = useState<

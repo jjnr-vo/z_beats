@@ -1,16 +1,5 @@
-import type { PlaybackAccess, PlaybackFixtureId } from "@/lib/playback";
-
-export type Artwork = "ochre" | "blue" | "moss" | "lilac" | "coral";
-
-export type Track = {
-  id: number;
-  title: string;
-  artist: string;
-  album: string;
-  duration: string;
-  fixtureId: PlaybackFixtureId;
-  artwork: Artwork;
-};
+import type { PlaybackAccess } from "@/lib/playback";
+import type { Track } from "@/shared/tracks";
 
 export type PlayerTrack = {
   track: Track;

@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import type { ReactNode } from "react";
+
 import { signOutAction } from "./actions";
+import { requireUser } from "@/lib/auth";
 
 export const instant = false;
 

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SignInForm } from "./form";
 
 export const instant = false;

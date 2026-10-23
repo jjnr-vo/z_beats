@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import {
   isPlaybackAccess,
   isPlaybackFixtureId,
-  playbackFixtures,
   type PlaybackAccess,
   type PlaybackFixtureId,
+  playbackFixtures,
 } from "@/lib/playback";
 
 /**

@@ -8,6 +8,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { PlaybackProof } from "./playback-proof";
 
 const fetchMock = vi.fn();

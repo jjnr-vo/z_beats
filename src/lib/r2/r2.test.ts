@@ -1,7 +1,13 @@
-import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { HeadObjectCommand, ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createPlaybackAccess, PlaybackObjectNotFoundError } from "./r2";
+import {
+  createLibraryPlaybackAccess,
+  createPlaybackAccess,
+  listSourceLibrary,
+  PlaybackObjectNotFoundError,
+} from "./r2";
+import { trackFormatFixtures } from "@/utils/track-format";
 
 vi.mock("server-only", () => ({}));
 
@@ -17,12 +23,70 @@ beforeEach(() => {
   vi.stubEnv("R2_SECRET_ACCESS_KEY", "test-secret");
   vi.stubEnv("R2_FIXTURE_MP3_KEY", "library/Special #1 + song.mp3");
   vi.stubEnv("R2_PLAYBACK_TTL_SECONDS", "900");
+  vi.stubEnv("R2_SOURCE_PREFIX", "library/");
   mocks.send.mockResolvedValue({});
   vi.spyOn(S3Client.prototype, "send").mockImplementation(mocks.send);
   vi.spyOn(S3Client.prototype, "destroy").mockImplementation(mocks.destroy);
 });
 
 afterEach(() => vi.unstubAllEnvs());
+
+describe("source library playback", () => {
+  it("signs the exact supported key after checking the source listing", async () => {
+    const key = "library/Artist/Song #1 + mix.MP3";
+    mocks.send.mockResolvedValueOnce({ Contents: [{ Key: key, Size: 1024 }] });
+    const result = await createLibraryPlaybackAccess(key);
+    expect(decodeURIComponent(new URL(result.url).pathname)).toContain(key);
+    expect(mocks.send.mock.calls[0][0]).toBeInstanceOf(ListObjectsV2Command);
+    expect(mocks.send.mock.calls[0][0].input.Prefix).toBe("library/");
+    expect(mocks.send.mock.calls[1][0].input.Key).toBe(key);
+    expect(mocks.destroy).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["outside/song.mp3", "library/cover.jpg"])(
+    "does not sign a key outside the supported listing: %s",
+    async (key) => {
+      mocks.send.mockResolvedValueOnce({ Contents: [{ Key: "library/cover.jpg" }] });
+      await expect(createLibraryPlaybackAccess(key)).rejects.toBeInstanceOf(
+        PlaybackObjectNotFoundError,
+      );
+      expect(mocks.send).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("collects objects across pages using the shared extensions", async () => {
+    mocks.send
+      .mockResolvedValueOnce({
+        Contents: [{ Key: "library/" }, { Key: "library/first.mp3" }],
+        IsTruncated: true,
+        NextContinuationToken: "next",
+      })
+      .mockResolvedValueOnce({
+        Contents: [
+          ...trackFormatFixtures.map((extension) => ({ Key: `library/track.${extension}` })),
+          { Key: "library/notes.txt" },
+        ],
+        IsTruncated: false,
+      });
+    const listing = await listSourceLibrary();
+    expect(listing.supported.map(({ key }) => key)).toEqual([
+      "library/first.mp3",
+      ...trackFormatFixtures.map((extension) => `library/track.${extension}`),
+    ]);
+    expect(listing.unsupported.map(({ key }) => key)).toEqual(["library/notes.txt"]);
+    expect(mocks.send.mock.calls[1][0].input.ContinuationToken).toBe("next");
+    expect(mocks.destroy).toHaveBeenCalledOnce();
+  });
+
+  it("does not sign when listing fails", async () => {
+    mocks.send.mockRejectedValue(new Error("Listing unavailable"));
+    await expect(createLibraryPlaybackAccess("library/song.mp3")).rejects.toThrow(
+      "Listing unavailable",
+    );
+    expect(mocks.send).toHaveBeenCalledOnce();
+    expect(mocks.destroy).toHaveBeenCalledOnce();
+  });
+});
 
 describe("R2 signing", () => {
   it("signs an EU GET for the exact allowlisted key without binding Range", async () => {

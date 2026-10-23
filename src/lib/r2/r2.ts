@@ -1,6 +1,11 @@
 import "server-only";
 
-import { GetObjectCommand, HeadObjectCommand, paginateListObjectsV2, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  paginateListObjectsV2,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { type PlaybackAccess, type PlaybackFixtureId } from "@/utils/playback";
@@ -40,13 +45,24 @@ export function createR2Client() {
 }
 
 export async function createPlaybackAccess(fixtureId: PlaybackFixtureId): Promise<PlaybackAccess> {
+  return createObjectPlaybackAccess(requiredEnv(fixtureVariables[fixtureId]));
+}
+
+export async function createLibraryPlaybackAccess(key: string): Promise<PlaybackAccess> {
+  const listing = await listSourceLibrary();
+  if (!listing.supported.some((object) => object.key === key)) {
+    throw new PlaybackObjectNotFoundError("Track was not found in the source library.");
+  }
+  return createObjectPlaybackAccess(key);
+}
+
+async function createObjectPlaybackAccess(key: string): Promise<PlaybackAccess> {
   const ttl = Number(process.env.R2_PLAYBACK_TTL_SECONDS ?? "900");
   if (!Number.isInteger(ttl) || ttl < 10 || ttl > 900) {
     throw new Error("R2_PLAYBACK_TTL_SECONDS must be an integer between 10 and 900.");
   }
 
   const bucket = requiredEnv("R2_BUCKET_NAME");
-  const key = requiredEnv(fixtureVariables[fixtureId]);
   const client = createR2Client();
 
   try {
@@ -75,20 +91,19 @@ export async function createPlaybackAccess(fixtureId: PlaybackFixtureId): Promis
   }
 }
 
-type SourceObject = {
+export type SourceObject = {
   key: string;
   size: number;
   etag: string;
   lastModified: string;
 };
 
-
-type SourceListing = {
+export type SourceListing = {
   supported: SourceObject[];
   unsupported: SourceObject[];
 };
 
-const supportedExtensions = new Set(trackFormatFixtures)
+const supportedExtensions = new Set(trackFormatFixtures);
 
 export async function listSourceLibrary(): Promise<SourceListing> {
   const bucket = requiredEnv("R2_BUCKET_NAME");

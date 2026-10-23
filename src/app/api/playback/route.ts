@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { createPlaybackAccess, PlaybackObjectNotFoundError } from "@/lib/r2/r2";
+import {
+  createLibraryPlaybackAccess,
+  createPlaybackAccess,
+  PlaybackObjectNotFoundError,
+} from "@/lib/r2/r2";
 import { createClient } from "@/lib/supabase/server";
 import { isPlaybackFixtureId } from "@/utils/playback";
 
@@ -32,7 +36,13 @@ export async function POST(request: Request) {
     try {
       body = await request.json();
     } catch {
-      return json({ error: "A JSON fixtureId is required." }, 400);
+      return json({ error: "A JSON key or fixtureId is required." }, 400);
+    }
+    if (body && typeof body === "object" && "key" in body) {
+      if (typeof body.key !== "string" || !body.key || "fixtureId" in body) {
+        return json({ error: "Choose a valid library track." }, 400);
+      }
+      return json(await createLibraryPlaybackAccess(body.key));
     }
     if (
       !body ||
@@ -46,13 +56,10 @@ export async function POST(request: Request) {
     return json(await createPlaybackAccess(body.fixtureId));
   } catch (error) {
     if (error instanceof PlaybackObjectNotFoundError) {
-      return json({ error: "This playback fixture is missing from R2." }, 404);
+      return json({ error: "This track is missing from the source library." }, 404);
     }
     // Do not log SDK errors: they may contain signed URLs or request credentials.
     console.error("Playback URL issuance failed.");
-    // console.error("Playback URL issuance failed.", {
-    //   category: error instanceof Error ? error.message : "UnknownError",
-    // });
     return json(
       {
         error: "Unable to load playback. Check the server R2 configuration and try again.",

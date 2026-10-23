@@ -24,8 +24,7 @@ export function LibraryView({
     <section aria-labelledby="library-title">
       <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
         <p aria-live="polite" className="text-sm text-[#687981]">
-          {visibleTracks.length} sample{" "}
-          {visibleTracks.length === 1 ? "track" : "tracks"}
+          {visibleTracks.length} sample {visibleTracks.length === 1 ? "track" : "tracks"}
         </p>
 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
@@ -37,13 +36,7 @@ export function LibraryView({
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle
-                cx="10.8"
-                cy="10.8"
-                r="6.8"
-                stroke="currentColor"
-                strokeWidth="1.7"
-              />
+              <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" strokeWidth="1.7" />
               <path
                 d="m16 16 4.2 4.2"
                 stroke="currentColor"
@@ -90,8 +83,8 @@ export function LibraryView({
       </div>
 
       <p className="mb-3 text-xs leading-5 text-[#687981]">
-        Demo content for layout and playback testing. These sample tracks are
-        not your personal collection.
+        Demo content for layout and playback testing. These sample tracks are not your personal
+        collection.
       </p>
       <div className="overflow-hidden rounded-xl border border-[#d8dfdc] bg-[#fafbf8]">
         <table className="w-full table-fixed border-collapse text-left">
@@ -103,10 +96,7 @@ export function LibraryView({
               <th className="w-[28%] px-4 py-3 font-medium" scope="col">
                 Album
               </th>
-              <th
-                className="w-[10%] px-4 py-3 text-right font-medium"
-                scope="col"
-              >
+              <th className="w-[10%] px-4 py-3 text-right font-medium" scope="col">
                 Length
               </th>
               <th className="w-[10%] px-4 py-3" scope="col">
@@ -116,14 +106,8 @@ export function LibraryView({
           </thead>
           <tbody className="divide-y divide-[#e5e9e6]">
             {visibleTracks.map((track) => (
-              <tr
-                className="group transition-colors hover:bg-[#f2f5f1]"
-                key={track.id}
-              >
-                <th
-                  className="px-3 py-3 text-left font-normal sm:px-5"
-                  scope="row"
-                >
+              <tr className="group transition-colors hover:bg-[#f2f5f1]" key={track.id}>
+                <th className="px-3 py-3 text-left font-normal sm:px-5" scope="row">
                   <div className="flex min-w-0 items-center gap-3">
                     <div
                       aria-hidden="true"
@@ -181,12 +165,8 @@ export function LibraryView({
         </table>
         {visibleTracks.length === 0 && (
           <div className="px-6 py-14 text-center">
-            <h2 className="text-base font-medium text-[#172a38]">
-              No matching tracks
-            </h2>
-            <p className="mt-2 text-sm text-[#687981]">
-              Try another title, artist, or album name.
-            </p>
+            <h2 className="text-base font-medium text-[#172a38]">No matching tracks</h2>
+            <p className="mt-2 text-sm text-[#687981]">Try another title, artist, or album name.</p>
           </div>
         )}
       </div>

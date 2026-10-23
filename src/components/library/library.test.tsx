@@ -1,12 +1,6 @@
 // @vitest-environment jsdom
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Library } from "./library";
@@ -37,9 +31,7 @@ describe("private library", () => {
   it("identifies demo content", () => {
     render(<Library />);
 
-    expect(
-      screen.getByText(/demo content for layout and playback testing/i),
-    ).toBeTruthy();
+    expect(screen.getByText(/demo content for layout and playback testing/i)).toBeTruthy();
     expect(screen.getByText(trackToTest.title)).toBeTruthy();
   });
 
@@ -62,8 +54,6 @@ describe("private library", () => {
     );
 
     fireEvent.loadedMetadata(player);
-    await waitFor(() =>
-      expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce(),
-    );
+    await waitFor(() => expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce());
   });
 });

@@ -35,13 +35,11 @@ export function Library() {
         return matches.sort((a, b) => a.title.localeCompare(b.title));
       case "artist":
         return matches.sort(
-          (a, b) =>
-            a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title),
+          (a, b) => a.artist.localeCompare(b.artist) || a.title.localeCompare(b.title),
         );
       case "album":
         return matches.sort(
-          (a, b) =>
-            a.album.localeCompare(b.album) || a.title.localeCompare(b.title),
+          (a, b) => a.album.localeCompare(b.album) || a.title.localeCompare(b.title),
         );
       default:
         return matches;
@@ -70,9 +68,7 @@ export function Library() {
       }
     } catch (cause) {
       if (!controller.signal.aborted) {
-        setError(
-          cause instanceof Error ? cause.message : "Playback request failed.",
-        );
+        setError(cause instanceof Error ? cause.message : "Playback request failed.");
       }
     } finally {
       if (!controller.signal.aborted) setLoadingTrackId(null);
@@ -85,9 +81,7 @@ export function Library() {
     try {
       await audio.current.play();
     } catch {
-      setError(
-        "Playback could not start automatically. Press Play in the player.",
-      );
+      setError("Playback could not start automatically. Press Play in the player.");
     }
   }
 
@@ -124,10 +118,7 @@ async function getTrack(track: Track, controller: AbortController) {
   const body: unknown = await response.json();
   if (!response.ok) {
     const message =
-      body &&
-      typeof body === "object" &&
-      "error" in body &&
-      typeof body.error === "string"
+      body && typeof body === "object" && "error" in body && typeof body.error === "string"
         ? body.error
         : "Unable to load this sample. Try again.";
     throw new Error(message);

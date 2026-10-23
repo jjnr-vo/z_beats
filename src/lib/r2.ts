@@ -1,10 +1,6 @@
 import "server-only";
 
-import {
-  GetObjectCommand,
-  HeadObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import type { PlaybackAccess, PlaybackFixtureId } from "./playback";
@@ -22,26 +18,19 @@ export class PlaybackObjectNotFoundError extends Error {}
 
 function requiredEnv(name: string) {
   const value = process.env[name];
-  if (!value)
-    throw new Error(`Missing ${name}. Configure R2 playback on the server.`);
+  if (!value) throw new Error(`Missing ${name}. Configure R2 playback on the server.`);
   return value;
 }
 
-export async function createPlaybackAccess(
-  fixtureId: PlaybackFixtureId,
-): Promise<PlaybackAccess> {
+export async function createPlaybackAccess(fixtureId: PlaybackFixtureId): Promise<PlaybackAccess> {
   const accountId = requiredEnv("R2_ACCOUNT_ID");
   if (!/^[a-f0-9]{32}$/.test(accountId)) {
-    throw new Error(
-      "R2_ACCOUNT_ID must be a 32-character hexadecimal account ID.",
-    );
+    throw new Error("R2_ACCOUNT_ID must be a 32-character hexadecimal account ID.");
   }
 
   const ttl = Number(process.env.R2_PLAYBACK_TTL_SECONDS ?? "900");
   if (!Number.isInteger(ttl) || ttl < 10 || ttl > 900) {
-    throw new Error(
-      "R2_PLAYBACK_TTL_SECONDS must be an integer between 10 and 900.",
-    );
+    throw new Error("R2_PLAYBACK_TTL_SECONDS must be an integer between 10 and 900.");
   }
 
   const bucket = requiredEnv("R2_BUCKET_NAME");
@@ -60,23 +49,17 @@ export async function createPlaybackAccess(
     try {
       await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
     } catch (error) {
-      if (
-        error instanceof Error &&
-        ["NotFound", "NoSuchKey"].includes(error.name)
-      ) {
-        throw new PlaybackObjectNotFoundError(
-          "Playback fixture was not found.",
-        );
+      if (error instanceof Error && ["NotFound", "NoSuchKey"].includes(error.name)) {
+        throw new PlaybackObjectNotFoundError("Playback fixture was not found.");
       }
       throw error;
     }
 
     const signingDate = new Date(Math.floor(Date.now() / 1000) * 1000);
-    const url = await getSignedUrl(
-      client,
-      new GetObjectCommand({ Bucket: bucket, Key: key }),
-      { expiresIn: ttl, signingDate },
-    );
+    const url = await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
+      expiresIn: ttl,
+      signingDate,
+    });
 
     return {
       url,

@@ -57,8 +57,13 @@ describe("playback URL boundary", () => {
   });
 
   it.each([
-    "not json", "null", "[]", "{}", '{"fixtureId":"../secret"}',
-    '{"fixtureId":"https://evil.example"}', '{"fixtureId":42}',
+    "not json",
+    "null",
+    "[]",
+    "{}",
+    '{"fixtureId":"../secret"}',
+    '{"fixtureId":"https://evil.example"}',
+    '{"fixtureId":42}',
   ])("rejects invalid fixture selection: %s", async (body) => {
     expect((await POST(request(body))).status).toBe(400);
     expect(mocks.sign).not.toHaveBeenCalled();
@@ -78,12 +83,16 @@ describe("playback URL boundary", () => {
     expect(JSON.stringify(log.mock.calls)).not.toContain("secret");
   });
 
-  it.each([503, 0, undefined])("reports auth service failures (%s) without signing", async (status) => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    mocks.getUser.mockResolvedValue({
-      data: { user: null }, error: { status },
-    });
-    expect((await POST(request())).status).toBe(503);
-    expect(mocks.sign).not.toHaveBeenCalled();
-  });
+  it.each([503, 0, undefined])(
+    "reports auth service failures (%s) without signing",
+    async (status) => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      mocks.getUser.mockResolvedValue({
+        data: { user: null },
+        error: { status },
+      });
+      expect((await POST(request())).status).toBe(503);
+      expect(mocks.sign).not.toHaveBeenCalled();
+    },
+  );
 });

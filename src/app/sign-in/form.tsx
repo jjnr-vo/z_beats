@@ -23,13 +23,7 @@ function SubmitButton() {
   );
 }
 
-function MessageBanner({
-  children,
-  tone,
-}: {
-  children: string;
-  tone: "error" | "success";
-}) {
+function MessageBanner({ children, tone }: { children: string; tone: "error" | "success" }) {
   return (
     <div
       className={`rounded-lg border px-4 py-3 text-sm ${
@@ -52,10 +46,7 @@ function FieldError({ children }: { children?: string }) {
 }
 
 export function SignInForm({ notice }: SignInFormProps) {
-  const [state, formAction] = useActionState<SignInFormState, FormData>(
-    signInAction,
-    {},
-  );
+  const [state, formAction] = useActionState<SignInFormState, FormData>(signInAction, {});
 
   return (
     <form action={formAction} className="space-y-5">

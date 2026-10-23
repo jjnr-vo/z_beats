@@ -6,9 +6,7 @@ import { requireUser } from "@/lib/auth";
 
 export const instant = false;
 
-export default async function ProtectedLayout({
-  children,
-}: Readonly<{ children: ReactNode }>) {
+export default async function ProtectedLayout({ children }: Readonly<{ children: ReactNode }>) {
   const user = await requireUser();
 
   return (
@@ -45,9 +43,7 @@ export default async function ProtectedLayout({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-5 pb-40 pt-8 sm:px-8 sm:pt-12">
-        {children}
-      </main>
+      <main className="mx-auto w-full max-w-7xl px-5 pb-40 pt-8 sm:px-8 sm:pt-12">{children}</main>
     </div>
   );
 }

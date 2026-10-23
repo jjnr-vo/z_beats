@@ -39,20 +39,22 @@ describe("R2 signing", () => {
     );
     expect(Date.parse(result.expiresAt)).toBeLessThanOrEqual(Date.now() + 900_000);
     expect(url.searchParams.get("X-Amz-Date")).toBe(
-      new Date(Date.parse(result.expiresAt) - 900_000).toISOString()
-        .replace(/[:-]|\.\d{3}/g, ""),
+      new Date(Date.parse(result.expiresAt) - 900_000).toISOString().replace(/[:-]|\.\d{3}/g, ""),
     );
     const head = mocks.send.mock.calls[0][0];
     expect(head).toBeInstanceOf(HeadObjectCommand);
     expect(head.input).toEqual({
-      Bucket: "private-music", Key: "library/Special #1 + song.mp3",
+      Bucket: "private-music",
+      Key: "library/Special #1 + song.mp3",
     });
     expect(mocks.destroy).toHaveBeenCalledOnce();
   });
 
   it("supports short expiry for live expiry checks", async () => {
     vi.stubEnv("R2_PLAYBACK_TTL_SECONDS", "10");
-    expect(new URL((await createPlaybackAccess("mp3")).url).searchParams.get("X-Amz-Expires")).toBe("10");
+    expect(new URL((await createPlaybackAccess("mp3")).url).searchParams.get("X-Amz-Expires")).toBe(
+      "10",
+    );
   });
 
   it.each(["0", "9", "901", "NaN", "10.5", ""])("rejects invalid TTL %s", async (ttl) => {

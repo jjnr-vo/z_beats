@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import { artworkClasses } from "./library.constants";
-import type { Track } from "./library.types";
+import { artworkClasses } from "@/shared/artwork";
+import type { Track } from "@/shared/tracks";
 
 export function LibraryView({
   loadingTrackId,

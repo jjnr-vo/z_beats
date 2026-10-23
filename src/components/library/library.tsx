@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { sampleTracks } from "./library.constants";
-import type { PlayerTrack, Track } from "./library.types";
+import type { PlayerTrack } from "./library.types";
 import { LibraryView } from "./library.view";
 import { Player } from "../player/player";
 import { isPlaybackAccess } from "@/lib/playback";
+import { sampleTracks, type Track } from "@/shared/tracks";
 
 export function Library() {
   const [query, setQuery] = useState("");

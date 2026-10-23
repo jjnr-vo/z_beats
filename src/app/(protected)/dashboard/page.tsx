@@ -1,6 +1,11 @@
 import { Library } from "@/components/library/library";
+import { requireUser } from "@/lib/auth";
+import { listSourceLibrary } from "@/lib/r2/r2";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  await requireUser();
+  const listing = await listSourceLibrary();
+
   return (
     <>
       <div className="flex flex-col gap-7 border-b border-[#d8dfdc] pb-8 sm:flex-row sm:items-end sm:justify-between">
@@ -14,7 +19,7 @@ export default function DashboardPage() {
           A home for the music you keep. Find a track, press play, and stay right here.
         </p>
       </div>
-      <Library />
+      <Library listing={listing} />
     </>
   );
 }

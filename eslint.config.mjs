@@ -12,26 +12,32 @@ export default defineConfig([
       import: importPlugin,
     },
     rules: {
-      "sort-imports": ["error", {
-        "ignoreCase": true,
-        "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false,
-        "allowSeparatedGroups": false
-      }],
-      "import/order": ["error", {
-        "groups": [
-          ["builtin", "external"],
-          ["internal", "parent", "sibling", "index", "object", "unknown"]
-        ],
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
+      "sort-imports": [
+        "error",
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true,
+          ignoreMemberSort: false,
+          allowSeparatedGroups: false,
         },
-        "newlines-between": "always"
-      }]
+      ],
+      "import/order": [
+        "error",
+        {
+          groups: [
+            ["builtin", "external"],
+            ["internal", "parent", "sibling", "index", "object", "unknown"],
+          ],
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+          "newlines-between": "always",
+        },
+      ],
     },
     settings: {
-      "import/internal-regex": "^@/"
-    }
-  }
+      "import/internal-regex": "^@/",
+    },
+  },
 ]);

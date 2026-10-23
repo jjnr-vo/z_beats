@@ -11,8 +11,7 @@ export default function DashboardPage() {
           Library
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-6 text-[#52656d]">
-          A home for the music you keep. Find a track, press play, and stay
-          right here.
+          A home for the music you keep. Find a track, press play, and stay right here.
         </p>
       </div>
       <Library />

@@ -1,12 +1,6 @@
 // @vitest-environment jsdom
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlaybackProof } from "./playback-proof";
@@ -57,14 +51,11 @@ describe("playback proof", () => {
     const oldPlayer = await load();
     oldPlayer.currentTime = 123;
     fireEvent.timeUpdate(oldPlayer);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Renew access at current position" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Renew access at current position" }));
     await waitFor(() => {
       expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer);
     });
-    const player =
-      screen.getByLabelText<HTMLAudioElement>("R2 playback sample");
+    const player = screen.getByLabelText<HTMLAudioElement>("R2 playback sample");
     Object.defineProperty(player, "duration", { value: 300 });
     fireEvent.loadedMetadata(player);
     expect(player.currentTime).toBe(123);
@@ -76,33 +67,21 @@ describe("playback proof", () => {
     render(<PlaybackProof />);
     const oldPlayer = await load();
     Object.defineProperty(oldPlayer, "paused", { value: false });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Renew access at current position" }),
-    );
-    await waitFor(() =>
-      expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Renew access at current position" }));
+    await waitFor(() => expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer));
     fireEvent.loadedMetadata(screen.getByLabelText("R2 playback sample"));
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce();
   });
 
   it("surfaces autoplay rejection instead of silently claiming successful resume", async () => {
-    vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValue(
-      new Error("blocked"),
-    );
+    vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValue(new Error("blocked"));
     render(<PlaybackProof />);
     const oldPlayer = await load();
     Object.defineProperty(oldPlayer, "paused", { value: false });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Renew access at current position" }),
-    );
-    await waitFor(() =>
-      expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Renew access at current position" }));
+    await waitFor(() => expect(screen.getByLabelText("R2 playback sample")).not.toBe(oldPlayer));
     fireEvent.loadedMetadata(screen.getByLabelText("R2 playback sample"));
-    expect((await screen.findByRole("alert")).textContent).toContain(
-      "Press Play",
-    );
+    expect((await screen.findByRole("alert")).textContent).toContain("Press Play");
   });
 
   it("surfaces media errors without an automatic retry loop", async () => {
@@ -135,9 +114,7 @@ describe("playback proof", () => {
     });
     render(<PlaybackProof />);
     fireEvent.click(screen.getByRole("button", { name: "Load track" }));
-    expect((await screen.findByRole("alert")).textContent).toContain(
-      "Sign in again",
-    );
+    expect((await screen.findByRole("alert")).textContent).toContain("Sign in again");
     expect(screen.queryByLabelText("R2 playback sample")).toBeNull();
   });
 
@@ -151,8 +128,6 @@ describe("playback proof", () => {
     });
     render(<PlaybackProof />);
     fireEvent.click(screen.getByRole("button", { name: "Load track" }));
-    expect((await screen.findByRole("alert")).textContent).toContain(
-      "invalid playback access",
-    );
+    expect((await screen.findByRole("alert")).textContent).toContain("invalid playback access");
   });
 });

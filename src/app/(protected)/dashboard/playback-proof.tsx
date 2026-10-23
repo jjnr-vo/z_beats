@@ -17,9 +17,7 @@ import {
  */
 export function PlaybackProof() {
   const [fixtureId, setFixtureId] = useState<PlaybackFixtureId>("mp3");
-  const [access, setAccess] = useState<
-    (PlaybackAccess & { generation: number }) | null
-  >(null);
+  const [access, setAccess] = useState<(PlaybackAccess & { generation: number }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
@@ -53,10 +51,7 @@ export function PlaybackProof() {
       const body: unknown = await response.json();
       if (!response.ok) {
         const message =
-          body &&
-          typeof body === "object" &&
-          "error" in body &&
-          typeof body.error === "string"
+          body && typeof body === "object" && "error" in body && typeof body.error === "string"
             ? body.error
             : "Unable to obtain playback access. Try again.";
         throw new Error(message);
@@ -72,9 +67,7 @@ export function PlaybackProof() {
       }
     } catch (cause) {
       if (!controller.signal.aborted) {
-        setError(
-          cause instanceof Error ? cause.message : "Playback request failed.",
-        );
+        setError(cause instanceof Error ? cause.message : "Playback request failed.");
       }
     } finally {
       if (!controller.signal.aborted) setLoading(false);
@@ -102,9 +95,9 @@ export function PlaybackProof() {
       <div>
         <h2 className="text-xl font-semibold">R2 signed playback proof</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-300">
-          Load a configured sample, then test playback and seeking. Audio
-          streams directly from private R2 storage. Access links expire; renew
-          access to reload the same track near your current position.
+          Load a configured sample, then test playback and seeking. Audio streams directly from
+          private R2 storage. Access links expire; renew access to reload the same track near your
+          current position.
         </p>
       </div>
       <div className="flex flex-wrap items-end gap-3">
@@ -174,8 +167,7 @@ export function PlaybackProof() {
               }
             />
             <p className="mt-2 text-sm text-zinc-400">
-              Access expires at{" "}
-              {new Date(access.expiresAt).toLocaleTimeString()}. Renewal is
+              Access expires at {new Date(access.expiresAt).toLocaleTimeString()}. Renewal is
               manual; there are no automatic retry loops.
             </p>
           </>
@@ -187,8 +179,8 @@ export function PlaybackProof() {
         </p>
       )}
       <p className="text-xs leading-5 text-zinc-400">
-        Proof only: no saved resume position or offline mode. Anyone holding an
-        access URL can fetch the file until expiry, even after sign-out.
+        Proof only: no saved resume position or offline mode. Anyone holding an access URL can fetch
+        the file until expiry, even after sign-out.
       </p>
     </section>
   );

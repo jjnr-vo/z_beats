@@ -14,10 +14,7 @@ function json(body: unknown, status = 200) {
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) {
-    return json(
-      { error: "Cross-origin playback requests are not allowed." },
-      403,
-    );
+    return json({ error: "Cross-origin playback requests are not allowed." }, 403);
   }
 
   try {
@@ -58,8 +55,7 @@ export async function POST(request: Request) {
     // });
     return json(
       {
-        error:
-          "Unable to load playback. Check the server R2 configuration and try again.",
+        error: "Unable to load playback. Check the server R2 configuration and try again.",
       },
       503,
     );

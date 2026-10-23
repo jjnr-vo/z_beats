@@ -22,12 +22,8 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     <main className="flex min-h-screen items-center justify-center bg-[#f3f4f0] px-5 py-12 text-[#172a38] sm:px-6">
       <div className="w-full max-w-md rounded-2xl border border-[#d8dfdc] bg-[#fafbf8] p-7 shadow-[0_20px_60px_rgba(23,42,56,0.08)] sm:p-9">
         <div className="space-y-3">
-          <p className="text-sm font-medium text-[#687981]">
-            Your music, kept close.
-          </p>
-          <h1 className="text-3xl font-semibold tracking-[-0.055em]">
-            Sign in to your library
-          </h1>
+          <p className="text-sm font-medium text-[#687981]">Your music, kept close.</p>
+          <h1 className="text-3xl font-semibold tracking-[-0.055em]">Sign in to your library</h1>
           <p className="text-sm leading-6 text-[#52656d]">
             Use your private z_beats account to return to your collection.
           </p>

@@ -39,19 +39,13 @@ export function Player({
                   <p className="truncate text-sm font-medium text-[#172a38]">
                     {playerTrack.track.title}
                   </p>
-                  <p className="truncate text-xs text-[#687981]">
-                    {playerTrack.track.artist}
-                  </p>
+                  <p className="truncate text-xs text-[#687981]">{playerTrack.track.artist}</p>
                 </div>
               </>
             ) : (
               <div>
-                <p className="text-sm font-medium text-[#344b58]">
-                  Nothing playing
-                </p>
-                <p className="text-xs text-[#687981]">
-                  Choose a sample track to start.
-                </p>
+                <p className="text-sm font-medium text-[#344b58]">Nothing playing</p>
+                <p className="text-xs text-[#687981]">Choose a sample track to start.</p>
               </div>
             )}
           </div>

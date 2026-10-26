@@ -49,6 +49,11 @@ Follow the `src/components/library/` layout for each feature:
 
 Split out a `<feature>.<part>.tsx` file when a view grows past the size limit.
 
+### Test values
+
+- When a test both sets up and verifies the same value, define it as a `const` and reuse it for setup and the expected assertion.
+- Declare shared test constants at the narrowest scope that covers their uses: inside a test for one test, inside a `describe` for that group, or at file scope when shared across the file.
+
 ### Dependencies
 
 - Components may import from other components, including another feature's component files.

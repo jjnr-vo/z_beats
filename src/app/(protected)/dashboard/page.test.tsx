@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import DashboardPage from "./page";
 
+const sourceListing = { supported: [{ key: "song.mp3" }], unsupported: [] };
 const mocks = vi.hoisted(() => ({
   requireUser: vi.fn(),
   listSourceLibrary: vi.fn(),
@@ -13,7 +14,7 @@ vi.mock("@/components/library/library", () => ({ Library: () => null }));
 
 beforeEach(() => {
   mocks.requireUser.mockResolvedValue({ id: "founder" });
-  mocks.listSourceLibrary.mockResolvedValue({ supported: [{ key: "song.mp3" }], unsupported: [] });
+  mocks.listSourceLibrary.mockResolvedValue(sourceListing);
 });
 
 describe("dashboard listing", () => {
@@ -26,9 +27,7 @@ describe("dashboard listing", () => {
       mocks.listSourceLibrary.mock.invocationCallOrder[0],
     );
     expect(fetch).not.toHaveBeenCalled();
-    expect(page.props.children[1].props.listing).toBe(
-      await mocks.listSourceLibrary.mock.results[0].value,
-    );
+    expect(page.props.children[1].props.listing).toBe(sourceListing);
   });
 
   it("does not list objects when authentication redirects", async () => {

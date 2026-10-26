@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Library } from "./library";
 import type { SourceListing } from "@/lib/r2/r2";
 
+const firstTrackTitle = "First #1 + song";
+const firstTrackKey = `library/Artist/${firstTrackTitle}.mp3`;
+const secondTrackTitle = "Second song";
+const secondTrackKey = `library/Other/${secondTrackTitle}.m4a`;
 const fetchMock = vi.fn();
 
 beforeEach(() => {
@@ -28,40 +32,44 @@ afterEach(() => {
 const listing: SourceListing = {
   supported: [
     {
-      key: "library/Artist/First #1 + song.mp3",
+      key: firstTrackKey,
       size: 1024,
       etag: "first",
       lastModified: "2026-10-20T10:00:00.000Z",
+      artwork: "blue",
     },
     {
-      key: "library/Other/Second song.m4a",
+      key: secondTrackKey,
       size: 2048,
       etag: "second",
       lastModified: "2026-10-23T10:00:00.000Z",
+      artwork: "moss",
     },
   ],
-  unsupported: [{ key: "library/cover.jpg", size: 50, etag: "", lastModified: "" }],
+  unsupported: [
+    { key: "library/cover.jpg", size: 50, etag: "", lastModified: "", artwork: "ochre" },
+  ],
 };
 
 describe("private library", () => {
   it("renders supported listing objects rather than demo tracks", () => {
     render(<Library listing={listing} />);
 
-    expect(screen.getByText("First #1 + song")).toBeTruthy();
-    expect(screen.getByText("Second song")).toBeTruthy();
+    expect(screen.getByText(firstTrackTitle)).toBeTruthy();
+    expect(screen.getByText(secondTrackTitle)).toBeTruthy();
     expect(screen.getByText("2 of 2 tracks")).toBeTruthy();
     expect(screen.getByText(/1 unsupported files excluded/)).toBeTruthy();
     expect(screen.queryByText("cover")).toBeNull();
     expect(screen.queryByText(/demo content/i)).toBeNull();
     expect(
       screen.getAllByRole("button", { name: /^Play / })[0].getAttribute("aria-label"),
-    ).toContain("Second song");
+    ).toContain(secondTrackTitle);
   });
 
   it("keeps the player available while searching the collection", async () => {
     render(<Library listing={listing} />);
 
-    const audioLabel = "First #1 + song by Unknown artist";
+    const audioLabel = `${firstTrackTitle} by Unknown artist`;
     const ctaLabel = `Play ${audioLabel}`;
 
     fireEvent.click(screen.getByRole("button", { name: ctaLabel }));
@@ -71,7 +79,7 @@ describe("private library", () => {
       "/api/playback",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ key: listing.supported[0].key }),
+        body: JSON.stringify({ key: firstTrackKey }),
         cache: "no-store",
       }),
     );
@@ -91,10 +99,10 @@ describe("private library", () => {
     });
     expect(
       screen.getAllByRole("button", { name: /^Play / })[0].getAttribute("aria-label"),
-    ).toContain("First #1 + song");
+    ).toContain(firstTrackTitle);
     fireEvent.change(screen.getByRole("searchbox"), { target: { value: "Other/" } });
-    expect(screen.queryByText("First #1 + song")).toBeNull();
-    expect(screen.getByText("Second song")).toBeTruthy();
+    expect(screen.queryByText(firstTrackTitle)).toBeNull();
+    expect(screen.getByText(secondTrackTitle)).toBeTruthy();
   });
 
   it("shows an empty library without substituting sample tracks", () => {

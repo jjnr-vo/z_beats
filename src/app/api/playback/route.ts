@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 
-import {
-  createLibraryPlaybackAccess,
-  createPlaybackAccess,
-  PlaybackObjectNotFoundError,
-} from "@/lib/r2/r2";
+import { createLibraryPlaybackAccess, PlaybackObjectNotFoundError } from "@/lib/r2/r2";
 import { createClient } from "@/lib/supabase/server";
-import { isPlaybackFixtureId } from "@/utils/playback";
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, {
@@ -44,16 +39,11 @@ export async function POST(request: Request) {
       }
       return json(await createLibraryPlaybackAccess(body.key));
     }
-    if (
-      !body ||
-      typeof body !== "object" ||
-      !("fixtureId" in body) ||
-      !isPlaybackFixtureId(body.fixtureId)
-    ) {
+    if (!body || typeof body !== "object") {
       return json({ error: "Choose a known playback fixture." }, 400);
     }
 
-    return json(await createPlaybackAccess(body.fixtureId));
+    return json({ error: "Request could not be processed" }, 400);
   } catch (error) {
     if (error instanceof PlaybackObjectNotFoundError) {
       return json({ error: "This track is missing from the source library." }, 404);

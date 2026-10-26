@@ -1,14 +1,7 @@
-import { trackFormatFixtures } from "@/utils/track-format";
-
-export type PlaybackFixtureId = (typeof trackFormatFixtures)[number];
 export type PlaybackAccess = {
   url: string;
   expiresAt: string;
 };
-
-export function isPlaybackFixtureId(value: unknown): value is PlaybackFixtureId {
-  return trackFormatFixtures.some((fixture) => fixture === value);
-}
 
 export function isPlaybackAccess(value: unknown): value is PlaybackAccess {
   if (!value || typeof value !== "object") return false;

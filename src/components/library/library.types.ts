@@ -7,7 +7,6 @@ export type PlayerTrack = {
   generation: number;
 };
 
-export type LibraryTrack = Omit<Track, "id" | "fixtureId"> & {
-  id: string;
+export type LibraryTrack = Omit<Track, "fixtureId"> & {
   lastModified: string;
 };

@@ -32,7 +32,7 @@ Examples:
 
 - `src/app/`: Next.js App Router only. Keep route files here (`page.tsx`, `layout.tsx`, `route.ts`, `actions.ts`). Components used by a single route can sit next to that route, as `dashboard/playback-proof.tsx` does.
 - `src/components/<feature>/`: UI grouped by feature. Reusable UI components that several features need go in a shared UI folder such as `src/components/ui/`, not in a feature folder.
-- `src/shared/`: shareable non-UI code used by more than one feature: types, style maps, constants and sample data. Examples: `artwork.ts` (the `Artwork` type and `artworkClasses`) and `tracks.ts` (the `Track` type and `sampleTracks`). Add a new file per concept, not per feature. Shared UI components stay in `src/components/`.
+- `src/shared/`: shareable non-UI code used by more than one feature: types, style maps, constants and sample data. Example: `artwork.ts` (the `Artwork` type and `artworkClasses`). Add a new file per concept, not per feature. Shared UI components stay in `src/components/`.
 - `src/lib/`: framework-agnostic logic with no React imports (auth, playback, storage, Supabase clients under `src/lib/supabase/`).
 - `src/utils/`: small pure helpers that don't belong in `src/lib/` (create it when the first helper is needed).
 - Keep tests next to the code they cover, named `<name>.test.ts` or `<name>.test.tsx`.
@@ -62,4 +62,3 @@ Split out a `<feature>.<part>.tsx` file when a view grows past the size limit.
 
 - Run `npm run format`, `npm run lint`, `npm run typecheck` and `npm test`.
 - Check that no touched file exceeds about 200 lines.
-

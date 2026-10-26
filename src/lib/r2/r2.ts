@@ -8,17 +8,10 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import { type PlaybackAccess, type PlaybackFixtureId } from "@/utils/playback";
+import type { Artwork } from "@/shared/artwork";
+import { getRandomArtwork } from "@/utils/artwork";
+import type { PlaybackAccess } from "@/utils/playback";
 import { trackFormatFixtures } from "@/utils/track-format";
-
-const fixtureVariables: Record<PlaybackFixtureId, string> = {
-  mp3: "R2_FIXTURE_MP3_KEY",
-  wav: "R2_FIXTURE_WAV_KEY",
-  aac: "R2_FIXTURE_AAC_KEY",
-  m4a: "R2_FIXTURE_M4A_KEY",
-  long: "R2_FIXTURE_LONG_KEY",
-  special: "R2_FIXTURE_SPECIAL_KEY",
-};
 
 export class PlaybackObjectNotFoundError extends Error {}
 
@@ -42,10 +35,6 @@ export function createR2Client() {
       secretAccessKey: requiredEnv("R2_SECRET_ACCESS_KEY"),
     },
   });
-}
-
-export async function createPlaybackAccess(fixtureId: PlaybackFixtureId): Promise<PlaybackAccess> {
-  return createObjectPlaybackAccess(requiredEnv(fixtureVariables[fixtureId]));
 }
 
 export async function createLibraryPlaybackAccess(key: string): Promise<PlaybackAccess> {
@@ -92,6 +81,7 @@ async function createObjectPlaybackAccess(key: string): Promise<PlaybackAccess> 
 }
 
 export type SourceObject = {
+  artwork: Artwork;
   key: string;
   size: number;
   etag: string;
@@ -122,6 +112,7 @@ export async function listSourceLibrary(): Promise<SourceListing> {
         if (!object.Key || object.Key.endsWith("/")) continue;
 
         const entry: SourceObject = {
+          artwork: getRandomArtwork(),
           key: object.Key,
           size: object.Size ?? 0,
           etag: object.ETag?.replaceAll('"', "") ?? "",

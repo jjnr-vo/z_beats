@@ -1,9 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
 
+import type { LibraryTrack } from "./library.types";
 import { artworkClasses } from "@/shared/artwork";
-import type { Track } from "@/shared/tracks";
 
 export function LibraryView({
+  totalTracks,
+  unsupportedCount,
   loadingTrackId,
   playTrack,
   query,
@@ -12,19 +14,21 @@ export function LibraryView({
   sort,
   visibleTracks,
 }: {
-  loadingTrackId: number | null;
-  playTrack(track: Track): Promise<void>;
+  totalTracks: number;
+  unsupportedCount: number;
+  loadingTrackId: string | null;
+  playTrack(track: LibraryTrack): Promise<void>;
   query: string;
   setQuery: Dispatch<SetStateAction<string>>;
   setSort: Dispatch<SetStateAction<string>>;
   sort: string;
-  visibleTracks: Track[];
+  visibleTracks: LibraryTrack[];
 }) {
   return (
     <section aria-labelledby="library-title">
       <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
         <p aria-live="polite" className="text-sm text-[#687981]">
-          {visibleTracks.length} sample {visibleTracks.length === 1 ? "track" : "tracks"}
+          {visibleTracks.length} of {totalTracks} tracks
         </p>
 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
@@ -73,7 +77,7 @@ export function LibraryView({
               onChange={(event) => setSort(event.target.value)}
               value={sort}
             >
-              <option value="added">Recently added</option>
+              <option value="added">Recently modified</option>
               <option value="title">Title</option>
               <option value="artist">Artist</option>
               <option value="album">Album</option>
@@ -83,8 +87,8 @@ export function LibraryView({
       </div>
 
       <p className="mb-3 text-xs leading-5 text-[#687981]">
-        Demo content for layout and playback testing. These sample tracks are not your personal
-        collection.
+        Tracks from your source library. Titles use filenames; audio metadata is not indexed yet.
+        {unsupportedCount > 0 && ` ${unsupportedCount} unsupported files excluded.`}
       </p>
       <div className="overflow-hidden rounded-xl border border-[#d8dfdc] bg-[#fafbf8]">
         <table className="w-full table-fixed border-collapse text-left">
@@ -165,8 +169,14 @@ export function LibraryView({
         </table>
         {visibleTracks.length === 0 && (
           <div className="px-6 py-14 text-center">
-            <h2 className="text-base font-medium text-[#172a38]">No matching tracks</h2>
-            <p className="mt-2 text-sm text-[#687981]">Try another title, artist, or album name.</p>
+            <h2 className="text-base font-medium text-[#172a38]">
+              {totalTracks === 0 ? "Your library is empty" : "No matching tracks"}
+            </h2>
+            <p className="mt-2 text-sm text-[#687981]">
+              {totalTracks === 0
+                ? "Add supported audio files to your configured R2 source."
+                : "Try another title, artist, or album name."}
+            </p>
           </div>
         )}
       </div>

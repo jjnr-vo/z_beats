@@ -2,17 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import type { PlayerTrack } from "./library.types";
+import type { LibraryTrack, PlayerTrack } from "./library.types";
 import { LibraryView } from "./library.view";
 import { Player } from "../player/player";
-import { isPlaybackAccess } from "@/lib/playback";
-import { sampleTracks, type Track } from "@/shared/tracks";
+import type { SourceListing } from "@/lib/r2/r2";
+import { getRandomArtwork } from "@/utils/artwork";
+import { isPlaybackAccess } from "@/utils/playback";
 
-export function Library() {
+export function Library({ listing }: { listing: SourceListing }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("added");
   const [playerTrack, setPlayerTrack] = useState<PlayerTrack | null>(null);
-  const [loadingTrackId, setLoadingTrackId] = useState<number | null>(null);
+  const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
   const pendingRequest = useRef<AbortController | null>(null);
@@ -20,11 +21,24 @@ export function Library() {
 
   useEffect(() => () => pendingRequest.current?.abort(), []);
 
+  const tracks = useMemo<LibraryTrack[]>(
+    () =>
+      listing.supported.map((object) => ({
+        id: object.key,
+        title: object.key.slice(object.key.lastIndexOf("/") + 1).replace(/\.[^.]+$/, ""),
+        artist: "Unknown artist",
+        artwork: object.artwork,
+        album: "Unknown album",
+        duration: "--:--",
+        lastModified: object.lastModified,
+      })),
+    [listing],
+  );
+
   const visibleTracks = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
-    // TODO: Remove sampleTracks in favour of music from R2
-    const matches = sampleTracks.filter((track) =>
-      [track.title, track.artist, track.album]
+    const matches = tracks.filter((track) =>
+      [track.title, track.artist, track.album, track.id]
         .join(" ")
         .toLocaleLowerCase()
         .includes(normalizedQuery),
@@ -42,11 +56,13 @@ export function Library() {
           (a, b) => a.album.localeCompare(b.album) || a.title.localeCompare(b.title),
         );
       default:
-        return matches;
+        return matches.sort(
+          (a, b) => b.lastModified.localeCompare(a.lastModified) || a.id.localeCompare(b.id),
+        );
     }
-  }, [query, sort]);
+  }, [query, sort, tracks]);
 
-  async function playTrack(track: Track) {
+  async function playTrack(track: LibraryTrack) {
     pendingRequest.current?.abort();
     const controller = new AbortController();
     pendingRequest.current = controller;
@@ -88,6 +104,8 @@ export function Library() {
   return (
     <>
       <LibraryView
+        totalTracks={tracks.length}
+        unsupportedCount={listing.unsupported.length}
         loadingTrackId={loadingTrackId}
         playTrack={playTrack}
         query={query}
@@ -107,11 +125,11 @@ export function Library() {
   );
 }
 
-async function getTrack(track: Track, controller: AbortController) {
+async function getTrack(track: LibraryTrack, controller: AbortController) {
   const response = await fetch("/api/playback", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fixtureId: track.fixtureId }),
+    body: JSON.stringify({ key: track.id }),
     cache: "no-store",
     signal: controller.signal,
   });
@@ -120,7 +138,7 @@ async function getTrack(track: Track, controller: AbortController) {
     const message =
       body && typeof body === "object" && "error" in body && typeof body.error === "string"
         ? body.error
-        : "Unable to load this sample. Try again.";
+        : "Unable to load this track. Try again.";
     throw new Error(message);
   }
 

@@ -51,13 +51,18 @@ npm run typecheck
 npm test
 ```
 
-## Current Bootstrap Scope
+## Current Implementation Scope
 
-The scaffold includes the Supabase auth shell and an R2 signed-playback proof.
-The next implementation milestone is:
+The app includes Supabase authentication, a dashboard populated directly from an
+R2 source listing, library search and sorting, and signed playback through a
+native audio player. Source listing is not yet a persisted catalogue or sync
+pipeline: audio tags, duration, and embedded artwork are not indexed.
 
-- validate deployed auth and R2 playback against the acceptance checks below
-- begin source listing and metadata/sync feasibility validation
+The next implementation milestones are:
+
+- complete deployed auth and R2 playback acceptance checks
+- validate audio metadata parsing
+- add a persisted catalogue and manual sync pipeline
 
 Planning artifacts currently in the repo:
 
@@ -124,31 +129,41 @@ Core auth routes:
 - `/auth/confirm`
 - `/dashboard`
 
-## R2 Signed Playback Proof
+## R2 Source Library and Signed Playback
 
-The dashboard contains a native audio player for five fixed fixture IDs. An
-authenticated `POST /api/playback` with `{"fixtureId":"mp3"}` returns
+The dashboard lists supported objects from the configured R2 source and plays
+the selected track using a native audio player. An authenticated
+`POST /api/playback` with `{"key":"library/song.mp3"}` returns
 `{"url":"https://...","expiresAt":"<ISO timestamp>"}` with `Cache-Control: no-store`.
-The endpoint checks the user independently of the dashboard layout, resolves only
-server-configured object keys, checks object existence, and signs a GET request.
-Audio streams directly from R2, not through Vercel. There is no catalogue, sync,
-custom player, or persistent resume state in this proof.
+The endpoint checks the user independently of the dashboard layout, verifies the
+key against the current supported source listing, checks object existence, and
+signs a GET request. Audio streams directly from R2, not through Vercel.
+
+Fixture requests such as `{"fixtureId":"mp3"}` remain supported for playback
+validation. The six configured fixture IDs are `mp3`, `wav`, `aac`, `m4a`,
+`long`, and `special`. There is no persisted catalogue, sync pipeline, or
+persistent resume state yet.
 
 ### Bucket and environment setup
 
 1. Create a **private EU-jurisdiction** R2 bucket. Keep the public development URL
    and public custom-domain access disabled.
 2. Create **Object Read only** credentials scoped to that bucket. These credentials
-   must permit HEAD/GET; do not grant write access for this proof.
-3. Upload authorized MP3, AAC, M4A, long-track, and special-character-path samples.
-   Set appropriate object content types: `audio/mpeg`, `audio/aac`, and `audio/mp4`
-   respectively. Extensions alone do not establish codec compatibility.
+   must permit object listing and HEAD/GET; do not grant write access.
+3. Upload authorized MP3, WAV, AAC, and M4A samples, including long tracks and
+   special-character paths. Set appropriate object content types: `audio/mpeg`,
+   `audio/wav`, `audio/aac`, and `audio/mp4`, respectively. Extensions alone do
+   not establish codec compatibility.
 4. Copy the entries in [.env.example](./.env.example) into local `.env` and Vercel's
    server environment. Never prefix R2 settings with `NEXT_PUBLIC_`.
 5. Set `R2_ACCOUNT_ID`, `R2_BUCKET_NAME`, `R2_ACCESS_KEY_ID`, and
-   `R2_SECRET_ACCESS_KEY`. Set the five `R2_FIXTURE_*_KEY` values to exact object
-   keys, including any prefix, spaces, or special characters; do not URL-encode
-   them or use full URLs. A fixture without a configured key reports an error.
+   `R2_SECRET_ACCESS_KEY`. Set `R2_SOURCE_PREFIX` to the exact key prefix to list,
+   such as `library/`; leaving it empty lists the whole bucket. Prefixes are
+   case-sensitive and should not be URL-encoded or include the bucket name.
+   For fixture-based validation, set the six `R2_FIXTURE_*_KEY` values to exact
+   object keys, including any prefix, spaces, or special characters; do not
+   URL-encode them or use full URLs. A fixture without a configured key reports
+   an error. Fixture variables are not needed for key-based library playback.
 6. The client uses `https://<ACCOUNT_ID>.eu.r2.cloudflarestorage.com` and SDK
    region `auto`. This requires an EU-jurisdiction bucket, not merely a European
    location hint. Presigned playback uses the S3 API domain, not a custom domain.
@@ -177,22 +192,52 @@ the URL signature supplies storage access. A GET signature does not authorize a
 HEAD request, even though HEAD is allowed by CORS.
 
 `R2_PLAYBACK_TTL_SECONDS` defaults to 900 (15 minutes); supported values are
-integers from 10 to 900. Use 10 temporarily for expiry tests. Renew access manually
-using the player's button: it requests a new URL and restores the in-memory
-position, attempting to continue if the player was playing. Browser autoplay
-restrictions may require pressing Play again. There are no automatic retries.
+integers from 10 to 900. Use 10 temporarily for expiry tests. After access expires,
+select the track's Play button in the library again to request a fresh URL.
+This remounts the audio element and starts from the beginning; playback position
+is not restored. Browser autoplay restrictions may require pressing Play in the
+native player. There is no dedicated renewal button or automatic retry.
 
 Presigned URLs are bearer tokens: anyone possessing one can fetch the object until
 expiry. Sign-out prevents new issuance, not use of an existing URL. This is not
 DRM and does not prevent a recipient from saving audio. Do not share or log signed
 URLs, including screenshots of network requests. Server issuance failures log
-only an error category, not SDK request details.
+only a generic message, not SDK request details.
+
+### Source listing authentication
+
+The dashboard verifies the current user and calls the server-only
+`listSourceLibrary()` helper directly. Do not fetch the application's own API
+from a Server Component: server-side fetches do not automatically forward the
+browser's authentication cookies.
+
+The `/api/track-listing` endpoint has been removed. Listing is performed directly
+on the server after dashboard authentication, not through an HTTP API. Listing
+failures propagate through dashboard rendering instead of returning listing JSON.
+Never log authentication cookies when debugging this flow.
+
+The full listing is passed to the library component. Supported objects are shown;
+unsupported files are counted separately. Titles come from filenames, artist and
+album are unknown, duration is unavailable, and artwork is randomly selected
+from the placeholder palette rather than extracted from audio files. The default
+sort uses R2's last-modified time, not a catalogue import date.
+Extension classification continues to use `trackFormatFixtures` in
+[src/utils/track-format.ts](./src/utils/track-format.ts). It currently also includes
+the proof labels `long` and `special`; classification is only an extension check,
+not validation of the file's actual format or browser compatibility.
+
+Selecting a track posts its exact object `key` to `/api/playback`. After
+authentication, the server verifies that the key exists in the current supported
+source listing before issuing access. Fixture-based requests remain supported for
+the playback proof. Listing the source on every playback request is a temporary
+proof-stage approach; a persisted catalogue should eventually replace that lookup.
 
 ### Acceptance checks
 
 Run `npm test`, `npm run lint`, `npm run typecheck`, and `npm run build`. Automated
 tests cover authentication, the fixture allowlist, signed URL properties,
-configuration validation, missing objects, safe failures, and player renewal.
+configuration validation, source pagination, listing-based rendering and playback,
+missing objects, safe failures, and player persistence while filtering.
 They do **not** prove real R2 or browser codec/range compatibility.
 
 Run the following against the deployed application and real R2 fixtures:
@@ -201,6 +246,8 @@ Run the following against the deployed application and real R2 fixtures:
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Anonymous POST to `/api/playback`                             | JSON 401, no URL, no redirect                                                        |
 | Signed-in request with unknown fixture ID                     | JSON 400, no URL                                                                     |
+| Signed-in request with a key outside the supported source listing | JSON 404, no URL                                                                  |
+| Signed-in dashboard load                                      | Source tracks appear; unsupported files are counted separately                       |
 | Request from a different Origin                               | JSON 403                                                                             |
 | Missing configured object                                     | JSON 404 and visible player error                                                    |
 | Missing key/config or R2 permission failure                   | JSON 503 and visible player error                                                    |
@@ -209,8 +256,7 @@ Run the following against the deployed application and real R2 fixtures:
 | Allowed Origin sent on range request                          | Matching `Access-Control-Allow-Origin`; range headers exposed                        |
 | All fixtures in Chrome desktop, Safari desktop, Safari iPhone | Metadata loads; play/pause and forward/backward seeks work                           |
 | Fresh range request after a 10-second URL expires             | Denied; do not mistake cached/buffered playback for valid access                     |
-| Renew access after expiry or a long pause                     | New URL issued; current position restored; Play works                                |
-| Renew while playing                                           | Position restored and playback continues, or explicit browser-blocked resume message |
+| Select the track again after expiry or a long pause            | New URL issued; playback starts from the beginning, or explicit autoplay message     |
 | Sign out, then request new playback access                    | 401; existing URL remains usable only until expiry                                   |
 | Healthy-network playback start from Sweden                    | Record time from pressing Play to audible playback; proposed target <=3 seconds      |
 

@@ -4,6 +4,7 @@ import type { LibraryTrack } from "./library.types";
 import { artworkClasses } from "@/shared/artwork";
 
 export function LibraryView({
+  currentTrackId,
   totalTracks,
   unsupportedCount,
   loadingTrackId,
@@ -14,6 +15,7 @@ export function LibraryView({
   sort,
   visibleTracks,
 }: {
+  currentTrackId?: string;
   totalTracks: number;
   unsupportedCount: number;
   loadingTrackId: string | null;
@@ -110,7 +112,11 @@ export function LibraryView({
           </thead>
           <tbody className="divide-y divide-[#c5d3e4]">
             {visibleTracks.map((track) => (
-              <tr className="hover:bg-[#e4ecf7]" key={track.id}>
+              <tr
+                className="group hover:bg-[#e4ecf7] data-[current=true]:bg-[#254cb8] data-[current=true]:text-white"
+                data-current={track.id === currentTrackId}
+                key={track.id}
+              >
                 <th className="px-3 py-3 text-left font-normal sm:px-5" scope="row">
                   <div className="flex min-w-0 items-center gap-3">
                     <div
@@ -123,23 +129,22 @@ export function LibraryView({
                     </div>
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-bold">{track.title}</span>
-                      <span className="block truncate text-xs text-[#435773]">
+                      <span className="block truncate text-xs text-[#435773] group-data-[current=true]:text-[#e4efff]">
                         {track.artist}
                         <span className="sm:hidden"> · {track.album}</span>
                       </span>
                     </span>
                   </div>
                 </th>
-                <td className="hidden truncate px-4 py-3 text-sm text-[#52656d] sm:table-cell">
-                  {track.album}
-                </td>
-                <td className="px-2 py-3 text-right font-mono text-xs tabular-nums text-[#687981] sm:px-4">
+                <td className="hidden truncate px-4 py-3 text-sm sm:table-cell">{track.album}</td>
+                <td className="w-16 px-2 py-3 text-right font-mono text-xs tabular-nums text-[#435773] group-data-[current=true]:text-[#e4efff] sm:px-4">
                   {track.duration}
                 </td>
-                <td className="px-3 py-3 text-right sm:px-4">
+                <td className="w-14 px-2 py-1 text-right sm:px-4">
                   <button
                     aria-label={`${loadingTrackId === track.id ? "Loading" : "Play"} ${track.title} by ${track.artist}`}
-                    className="inline-grid size-10 place-items-center rounded-full text-[#344b58] transition hover:bg-[#e8ede9] hover:text-[#172a38] disabled:cursor-wait disabled:opacity-50"
+                    aria-current={track.id === currentTrackId ? "true" : undefined}
+                    className="inline-grid size-10 place-items-center rounded hover:bg-[#254cb8]/10 focus-visible:outline-offset-0 disabled:cursor-wait disabled:opacity-50 group-data-[current=true]:hover:bg-white/15 group-data-[current=true]:focus-visible:outline-[#8deeff]"
                     disabled={loadingTrackId !== null}
                     onClick={() => void playTrack(track)}
                     type="button"

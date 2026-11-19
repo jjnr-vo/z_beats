@@ -1,3 +1,4 @@
+import { Spectrum } from "./player.spectrum";
 import type { PlayerTrack } from "@/shared/player-track";
 
 function formatTime(seconds: number) {
@@ -11,9 +12,13 @@ export function PlayerView({
   error,
   onSeek,
   onTogglePlayback,
+  onToggleVisualizer,
   onVolumeChange,
   playing,
+  spectrumAnalyser,
   track,
+  visualizerEnabled,
+  visualizerMessage,
   volume,
 }: {
   currentTime: number;
@@ -21,9 +26,13 @@ export function PlayerView({
   error: string | null;
   onSeek: (time: number) => void;
   onTogglePlayback: () => void;
+  onToggleVisualizer: () => void;
   onVolumeChange: (level: number) => void;
   playing: boolean;
+  spectrumAnalyser: AnalyserNode | null;
   track?: PlayerTrack["track"];
+  visualizerEnabled: boolean;
+  visualizerMessage: string | null;
   volume: number;
 }) {
   return (
@@ -32,6 +41,16 @@ export function PlayerView({
       className="fixed inset-x-0 bottom-0 z-20 bg-[linear-gradient(transparent,#c8d6e8_42%)] px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto max-w-[64.5rem]">
+        <p
+          aria-live="polite"
+          className={
+            visualizerMessage
+              ? "mb-2 rounded border border-[#98abc5] bg-[#f2f6fb] px-3 py-2 text-sm"
+              : "sr-only"
+          }
+        >
+          {visualizerMessage}
+        </p>
         {error && (
           <div
             className="mb-2 rounded-lg border border-[#d9b0a2] bg-[#fff8f5] px-4 py-2 text-sm text-[#7e3825]"
@@ -58,13 +77,18 @@ export function PlayerView({
             </svg>
           </button>
           <div className="min-w-0">
-            <div className="flex min-h-13 items-center justify-between gap-2 rounded-lg border border-[#192e5a] bg-[linear-gradient(174deg,#21488f,#0e2256_58%)] px-2.5 py-2 text-[#d8f8ff] shadow-[inset_0_2px_6px_#050d2acc,0_1px_white] sm:min-h-16 sm:px-4">
+            <div className="grid min-h-13 grid-cols-[minmax(0,1fr)_minmax(1.75rem,25%)_auto] items-center gap-2 rounded-lg border border-[#192e5a] bg-[linear-gradient(174deg,#21488f,#0e2256_58%)] px-2.5 py-2 text-[#d8f8ff] shadow-[inset_0_2px_6px_#050d2acc,0_1px_white] sm:min-h-16 sm:grid-cols-[minmax(0,1fr)_minmax(4rem,12rem)_auto] sm:px-4">
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold sm:text-base">
                   {track?.title ?? "Nothing playing"}
                 </p>
                 <p className="truncate text-xs">{track?.artist ?? "Choose a track to start."}</p>
               </div>
+              <Spectrum
+                active={playing && visualizerEnabled}
+                analyser={spectrumAnalyser}
+                visible={visualizerEnabled}
+              />
               {track && (
                 <span
                   aria-label="Playback time"
@@ -78,11 +102,11 @@ export function PlayerView({
                 </span>
               )}
             </div>
-            <div className="mt-1 flex min-w-0 items-center gap-3">
+            <div className="mt-1 grid min-w-0 grid-cols-[auto_1fr] items-center gap-x-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
               <input
                 aria-label="Seek"
                 aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
-                className="h-8 min-w-0 flex-1 accent-[#254cb8] disabled:opacity-50"
+                className="col-span-2 h-8 w-full min-w-0 accent-[#254cb8] disabled:opacity-50 sm:col-span-1"
                 disabled={!duration}
                 max={duration || 1}
                 min={0}
@@ -118,6 +142,19 @@ export function PlayerView({
                   value={volume}
                 />
               </label>
+              <button
+                aria-pressed={visualizerEnabled}
+                className="flex min-h-9 items-center gap-1.5 justify-self-end rounded-md border border-[#7288a7] bg-[linear-gradient(#f9fcff,#b2c2d7)] px-2.5 text-xs font-bold shadow-[inset_0_1px_white] enabled:hover:bg-[linear-gradient(white,#c4d5ef)] disabled:opacity-60"
+                disabled={!track}
+                onClick={onToggleVisualizer}
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`size-1.5 rounded-full ${visualizerEnabled ? "bg-[#167285] shadow-[0_0_5px_#8deeff]" : "bg-[#526785]"}`}
+                />
+                Visualizer
+              </button>
             </div>
           </div>
         </div>

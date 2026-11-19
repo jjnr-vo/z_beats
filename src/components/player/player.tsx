@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 
 import { PlayerView } from "./player.view";
+import { useSpectrum } from "./use-spectrum";
 import type { PlayerTrack } from "@/shared/player-track";
 
 const initialMedia = { generation: 0, currentTime: 0, duration: 0, playing: false };
@@ -16,6 +17,7 @@ export function Player({
 }) {
   const audio = useRef<HTMLAudioElement>(null);
   const autoplayAttempted = useRef<HTMLAudioElement | null>(null);
+  const spectrum = useSpectrum();
   const [media, setMedia] = useState(initialMedia);
   const [volume, setVolume] = useState(1);
   const playback = media.generation === playerTrack?.generation ? media : initialMedia;
@@ -38,6 +40,7 @@ export function Player({
       return;
     }
     setError(null);
+    spectrum.resumeTrack(() => audio.current);
     try {
       await element.play();
     } catch {
@@ -61,6 +64,7 @@ export function Player({
   async function loadTrack(element: HTMLAudioElement) {
     if (autoplayAttempted.current === element) return;
     autoplayAttempted.current = element;
+    spectrum.disconnectPreviousTrack(element);
     element.volume = volume;
     sync(element);
     try {
@@ -79,6 +83,7 @@ export function Player({
           ref={audio}
           key={playerTrack.generation}
           aria-label={`${playerTrack.track.title} by ${playerTrack.track.artist}`}
+          crossOrigin="anonymous"
           onDurationChange={(event) => sync(event.currentTarget)}
           onEnded={(event) => sync(event.currentTarget)}
           onError={() =>
@@ -91,6 +96,7 @@ export function Player({
           onPlay={(event) => {
             setError(null);
             sync(event.currentTarget);
+            spectrum.connectTrack(event.currentTarget);
           }}
           onTimeUpdate={(event) => sync(event.currentTarget)}
           preload="metadata"
@@ -105,7 +111,11 @@ export function Player({
         onTogglePlayback={() => void togglePlayback()}
         onVolumeChange={changeVolume}
         playing={playback.playing}
+        spectrumAnalyser={spectrum.analyser}
         track={playerTrack?.track}
+        visualizerEnabled={spectrum.enabled}
+        visualizerMessage={spectrum.message}
+        onToggleVisualizer={() => void spectrum.toggle(() => audio.current)}
         volume={volume}
       />
     </>

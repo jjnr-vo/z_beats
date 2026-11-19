@@ -54,8 +54,8 @@ npm test
 ## Current Implementation Scope
 
 The app includes Supabase authentication, a dashboard populated directly from an
-R2 source listing, library search and sorting, and signed playback through a
-native audio player. Source listing is not yet a persisted catalogue or sync
+R2 source listing, library search and sorting, and signed playback through the
+Ice Deck player. Source listing is not yet a persisted catalogue or sync
 pipeline: audio tags, duration, and embedded artwork are not indexed.
 
 The next implementation milestones are:
@@ -132,7 +132,7 @@ Core auth routes:
 ## R2 Source Library and Signed Playback
 
 The dashboard lists supported objects from the configured R2 source and plays
-the selected track using a native audio player. An authenticated
+the selected track in the Ice Deck dock. An authenticated
 `POST /api/playback` with `{"key":"library/song.mp3"}` returns
 `{"url":"https://...","expiresAt":"<ISO timestamp>"}` with `Cache-Control: no-store`.
 The endpoint checks the user independently of the dashboard layout, verifies the
@@ -196,7 +196,12 @@ integers from 10 to 900. Use 10 temporarily for expiry tests. After access expir
 select the track's Play button in the library again to request a fresh URL.
 This remounts the audio element and starts from the beginning; playback position
 is not restored. Browser autoplay restrictions may require pressing Play in the
-native player. There is no dedicated renewal button or automatic retry.
+dock. There is no dedicated renewal button or automatic retry.
+
+The dock's **Visualizer** is off by default. Turn it on after selecting a track
+to see spectrum bars react to the audio. The bars stop when playback is paused,
+and reduced-motion settings replace them with a stationary line. Web Audio
+analysis requires the bucket CORS policy above for the exact app origin.
 
 Presigned URLs are bearer tokens: anyone possessing one can fetch the object until
 expiry. Sign-out prevents new issuance, not use of an existing URL. This is not

@@ -26,8 +26,8 @@ export function LibraryView({
 }) {
   return (
     <section aria-labelledby="library-title">
-      <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-        <p aria-live="polite" className="text-sm text-[#687981]">
+      <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <p aria-live="polite" className="shrink-0 text-xs text-[#435773]">
           {visibleTracks.length} of {totalTracks} tracks
         </p>
 
@@ -49,14 +49,14 @@ export function LibraryView({
               />
             </svg>
             <input
-              className="h-11 w-full rounded-lg border border-[#cbd5d1] bg-white/70 pl-10 pr-4 text-sm text-[#172a38] placeholder:text-[#829096] focus:border-[#172a38]"
+              className="h-10 w-full rounded-[0.3125rem] border border-[#98abc5] bg-[#f9fcff] pl-10 pr-3 text-sm shadow-[inset_0_1px_2px_#11254a22] placeholder:text-[#435773]"
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search tracks, artists, albums"
               type="search"
               value={query}
             />
           </label>
-          <label className="flex h-11 items-center gap-2 rounded-lg border border-[#cbd5d1] bg-white/70 px-3">
+          <label className="flex h-10 items-center gap-2 rounded-[0.3125rem] border border-[#98abc5] bg-[#f9fcff] px-3 shadow-[inset_0_1px_2px_#11254a22]">
             <span className="sr-only">Sort tracks</span>
             <svg
               aria-hidden="true"
@@ -73,7 +73,7 @@ export function LibraryView({
             </svg>
             <select
               aria-label="Sort tracks"
-              className="w-full bg-transparent text-sm text-[#344b58] outline-none"
+              className="w-full bg-transparent text-sm"
               onChange={(event) => setSort(event.target.value)}
               value={sort}
             >
@@ -86,13 +86,13 @@ export function LibraryView({
         </div>
       </div>
 
-      <p className="mb-3 text-xs leading-5 text-[#687981]">
+      <p className="mb-3 px-4 text-xs leading-5 text-[#435773] sm:px-6">
         Tracks from your source library. Titles use filenames; audio metadata is not indexed yet.
         {unsupportedCount > 0 && ` ${unsupportedCount} unsupported files excluded.`}
       </p>
-      <div className="overflow-hidden rounded-xl border border-[#d8dfdc] bg-[#fafbf8]">
+      <div className="overflow-hidden rounded-b-[0.625rem]">
         <table className="w-full table-fixed border-collapse text-left">
-          <thead className="hidden border-b border-[#d8dfdc] text-xs font-medium text-[#687981] sm:table-header-group">
+          <thead className="hidden border-y border-[#c5d3e4] bg-[#e4ecf7] text-xs text-[#435773] sm:table-header-group">
             <tr>
               <th className="w-[52%] px-5 py-3 font-medium" scope="col">
                 Track
@@ -108,24 +108,22 @@ export function LibraryView({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#e5e9e6]">
+          <tbody className="divide-y divide-[#c5d3e4]">
             {visibleTracks.map((track) => (
-              <tr className="group transition-colors hover:bg-[#f2f5f1]" key={track.id}>
+              <tr className="hover:bg-[#e4ecf7]" key={track.id}>
                 <th className="px-3 py-3 text-left font-normal sm:px-5" scope="row">
                   <div className="flex min-w-0 items-center gap-3">
                     <div
                       aria-hidden="true"
-                      className={`relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-md ${artworkClasses[track.artwork]}`}
+                      className={`relative grid size-8 shrink-0 place-items-center overflow-hidden rounded ${artworkClasses[track.artwork]}`}
                     >
                       <span className="absolute -right-2 -top-3 size-8 rounded-full border border-white/45" />
                       <span className="absolute -bottom-3 -left-2 size-9 rounded-full border border-white/55" />
                       <span className="relative size-3 rounded-full bg-white/65" />
                     </div>
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-[#172a38]">
-                        {track.title}
-                      </span>
-                      <span className="mt-1 block truncate text-xs text-[#687981]">
+                      <span className="block truncate text-sm font-bold">{track.title}</span>
+                      <span className="block truncate text-xs text-[#435773]">
                         {track.artist}
                         <span className="sm:hidden"> · {track.album}</span>
                       </span>
@@ -149,7 +147,7 @@ export function LibraryView({
                     {loadingTrackId === track.id ? (
                       <span
                         aria-hidden="true"
-                        className="size-4 animate-spin rounded-full border-2 border-[#aebbb6] border-t-[#d46b43] motion-reduce:animate-none"
+                        className="size-4 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none"
                       />
                     ) : (
                       <svg

@@ -10,30 +10,37 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
   const user = await requireUser();
 
   return (
-    <div className="min-h-screen bg-[#f3f4f0] text-[#172a38]">
-      <header className="border-b border-[#d8dfdc] bg-[#f3f4f0]/95">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+    <div className="min-h-dvh bg-[radial-gradient(ellipse_at_63%_25%,#f1f7ff,#d3dfed_59%,#afc1d9)] bg-fixed font-[Tahoma,Verdana,sans-serif] text-[#11254a] [&_:focus-visible]:outline-[#254cb8]">
+      <header>
+        <div className="mx-auto flex w-full max-w-[66.5rem] items-center justify-between gap-4 px-4 py-6 sm:py-10">
           <Link
             aria-label="z_beats library"
-            className="inline-flex items-center gap-3 rounded-sm text-[#172a38] focus-visible:outline-[#d46b43]"
+            className="inline-flex items-center gap-3 rounded-sm"
             href="/dashboard"
           >
-            <span
+            <svg
               aria-hidden="true"
-              className="grid size-9 place-items-center rounded-full bg-[#172a38] text-sm font-semibold tracking-tight text-[#f3f4f0]"
+              className="size-8 rounded-lg bg-[#254cb8] p-1.5 text-white shadow-[inset_0_1px_2px_#fff8,0_2px_3px_#11254a55]"
+              fill="none"
+              viewBox="0 0 24 24"
             >
-              z
-            </span>
-            <span className="text-lg font-semibold tracking-[-0.06em]">z_beats</span>
+              <path
+                d="M2 12h4l3-6 4 12 3-9 2 3h4"
+                stroke="currentColor"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+            <span className="text-xl font-bold tracking-tight">Z Beats</span>
           </Link>
 
           <div className="flex items-center gap-3 sm:gap-5">
-            <span className="hidden max-w-56 truncate text-sm text-[#687981] sm:inline">
+            <span className="hidden max-w-56 truncate text-sm text-[#435773] sm:inline">
               {user.email}
             </span>
             <form action={signOutAction}>
               <button
-                className="rounded-full border border-[#cbd5d1] px-4 py-2 text-sm font-medium text-[#344b58] transition hover:border-[#172a38] hover:bg-white"
+                className="rounded-full border border-[#7288a7] px-4 py-2 text-sm font-medium hover:bg-white/70"
                 type="submit"
               >
                 Sign out
@@ -43,7 +50,9 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-5 pb-40 pt-8 sm:px-8 sm:pt-12">{children}</main>
+      <main className="mx-auto w-full max-w-[66.5rem] px-4 pb-[calc(14rem+env(safe-area-inset-bottom))]">
+        {children}
+      </main>
     </div>
   );
 }

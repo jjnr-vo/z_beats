@@ -20,11 +20,10 @@ export function Player({
     <>
       <footer
         aria-label="Now playing"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[#cbd5d1] bg-[#f7f8f5]/95 shadow-[0_-8px_28px_rgba(23,42,56,0.06)] backdrop-blur"
-        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+        className="fixed inset-x-0 bottom-0 z-20 px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       >
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-6 sm:px-8">
-          <div className="flex min-w-0 items-center gap-3 sm:w-[22rem]">
+        <div className="mx-auto flex w-full max-w-[64.5rem] flex-col gap-3 rounded-2xl border border-[#687f9b] bg-[linear-gradient(#f9fcff,#acb9cc_49%,#e0e7f2_51%,#a2afc2)] p-3 shadow-[inset_0_2px_1px_white,0_12px_22px_#344c7244] sm:flex-row sm:items-center sm:gap-6 sm:p-4">
+          <div className="flex min-w-0 items-center gap-3 rounded-lg border border-[#192e5a] bg-[linear-gradient(174deg,#21488f,#0e2256_58%)] px-3 py-2 text-[#d8f8ff] shadow-[inset_0_2px_6px_#050d2acc,0_1px_white] sm:w-[22rem]">
             {playerTrack ? (
               <>
                 <div
@@ -36,16 +35,14 @@ export function Player({
                   <span className="relative size-3 rounded-full bg-white/65" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-[#172a38]">
-                    {playerTrack.track.title}
-                  </p>
-                  <p className="truncate text-xs text-[#687981]">{playerTrack.track.artist}</p>
+                  <p className="truncate text-sm font-bold">{playerTrack.track.title}</p>
+                  <p className="truncate text-xs">{playerTrack.track.artist}</p>
                 </div>
               </>
             ) : (
               <div>
-                <p className="text-sm font-medium text-[#344b58]">Nothing playing</p>
-                <p className="text-xs text-[#687981]">Choose a track to start.</p>
+                <p className="text-sm font-bold">Nothing playing</p>
+                <p className="text-xs">Choose a track to start.</p>
               </div>
             )}
           </div>
@@ -67,7 +64,7 @@ export function Player({
                 src={playerTrack.access.url}
               />
             ) : (
-              <p className="hidden text-xs text-[#829096] sm:block">
+              <p className="hidden text-xs text-[#435773] sm:block">
                 Playback stays available while you browse your library.
               </p>
             )}

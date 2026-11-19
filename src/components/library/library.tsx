@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import type { LibraryTrack, PlayerTrack } from "./library.types";
+import type { LibraryTrack } from "./library.types";
 import { LibraryView } from "./library.view";
 import { Player } from "../player/player";
 import type { SourceListing } from "@/lib/r2/r2";
-import { getRandomArtwork } from "@/utils/artwork";
+import type { PlayerTrack } from "@/shared/player-track";
 import { isPlaybackAccess } from "@/utils/playback";
 
 export function Library({ listing }: { listing: SourceListing }) {
@@ -15,9 +15,7 @@ export function Library({ listing }: { listing: SourceListing }) {
   const [playerTrack, setPlayerTrack] = useState<PlayerTrack | null>(null);
   const [loadingTrackId, setLoadingTrackId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const audio = useRef<HTMLAudioElement>(null);
   const pendingRequest = useRef<AbortController | null>(null);
-  const shouldStartPlayback = useRef(false);
 
   useEffect(() => () => pendingRequest.current?.abort(), []);
 
@@ -75,7 +73,6 @@ export function Library({ listing }: { listing: SourceListing }) {
         throw new Error("The server returned invalid playback access.");
       }
       if (!controller.signal.aborted) {
-        shouldStartPlayback.current = true;
         setPlayerTrack((current) => ({
           track,
           access: trackResponse,
@@ -91,19 +88,10 @@ export function Library({ listing }: { listing: SourceListing }) {
     }
   }
 
-  async function startPlayback() {
-    if (!shouldStartPlayback.current || !audio.current) return;
-    shouldStartPlayback.current = false;
-    try {
-      await audio.current.play();
-    } catch {
-      setError("Playback could not start automatically. Press Play in the player.");
-    }
-  }
-
   return (
     <>
       <LibraryView
+        currentTrackId={playerTrack?.track.id}
         totalTracks={tracks.length}
         unsupportedCount={listing.unsupported.length}
         loadingTrackId={loadingTrackId}
@@ -114,13 +102,7 @@ export function Library({ listing }: { listing: SourceListing }) {
         sort={sort}
         visibleTracks={visibleTracks}
       />
-      <Player
-        audio={audio}
-        error={error}
-        playerTrack={playerTrack}
-        setError={setError}
-        startPlayback={startPlayback}
-      />
+      <Player error={error} playerTrack={playerTrack} setError={setError} />
     </>
   );
 }

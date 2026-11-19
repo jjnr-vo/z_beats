@@ -7,19 +7,11 @@ export default async function DashboardPage() {
   const listing = await listSourceLibrary();
 
   return (
-    <>
-      <div className="flex flex-col gap-7 border-b border-[#d8dfdc] pb-8 sm:flex-row sm:items-end sm:justify-between">
-        <h1
-          className="mt-2 text-4xl font-semibold tracking-[-0.065em] text-[#172a38] sm:text-5xl"
-          id="library-title"
-        >
-          Library
-        </h1>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-[#52656d]">
-          A home for the music you keep. Find a track, press play, and stay right here.
-        </p>
-      </div>
+    <div className="rounded-[0.625rem] border border-[#98abc5] bg-[#f2f6fb] pt-5 shadow-[0_12px_30px_#11254a25,inset_0_1px_white]">
+      <h1 className="px-4 text-[1.375rem] font-bold tracking-tight sm:px-6" id="library-title">
+        Your library
+      </h1>
       <Library listing={listing} />
-    </>
+    </div>
   );
 }

@@ -105,6 +105,39 @@ describe("private library", () => {
     expect(screen.getByText(secondTrackTitle)).toBeTruthy();
   });
 
+  it("uses the dock to control and seek the current track", async () => {
+    render(<Library listing={listing} />);
+    const rowButton = screen.getByRole("button", {
+      name: `Play ${firstTrackTitle} by Unknown artist`,
+    });
+    const seek = screen.getByRole<HTMLInputElement>("slider", { name: "Seek" });
+    expect(seek.disabled).toBe(true);
+
+    fireEvent.click(rowButton);
+    const element = await screen.findByLabelText<HTMLAudioElement>(
+      `${firstTrackTitle} by Unknown artist`,
+    );
+    const duration = 180;
+    const position = 24;
+    Object.defineProperty(element, "duration", { value: duration });
+    fireEvent.loadedMetadata(element);
+    expect(rowButton.getAttribute("aria-current")).toBe("true");
+    expect(seek.max).toBe(String(duration));
+    fireEvent.change(seek, { target: { value: String(position) } });
+    expect(element.currentTime).toBe(position);
+    expect(screen.getByText("0:24", { exact: false })).toBeTruthy();
+
+    let paused = false;
+    Object.defineProperty(element, "paused", { get: () => paused });
+    const pause = vi.spyOn(element, "pause").mockImplementation(() => {
+      paused = true;
+      fireEvent.pause(element);
+    });
+    fireEvent.play(element);
+    fireEvent.click(screen.getByRole("button", { name: "Pause playback" }));
+    expect(pause).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Resume playback" })).toBeTruthy();
+  });
   it("shows an empty library without substituting sample tracks", () => {
     render(<Library listing={{ supported: [], unsupported: [] }} />);
     expect(screen.getByText("Your library is empty")).toBeTruthy();
